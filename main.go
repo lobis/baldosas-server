@@ -26,7 +26,7 @@ func startGrpcServer() {
 	server := grpc.NewServer()
 	pb.RegisterStatusServiceServer(server, &grpcServer{})
 	// start tcp server
-	listen, err := net.Listen("tcp", ":5000")
+	listen, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		fmt.Println("Error listening:", err)
 		return
