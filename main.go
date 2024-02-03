@@ -15,21 +15,13 @@ type position struct {
 	x, y int
 }
 
-type baldosa struct {
-	ipAddress string
-	position  position
+type baldosaServer struct {
+	ipAddress   string
+	connection  net.Conn
+	stopChannel chan bool
 }
 
-var baldosas = []baldosa{
-	{
-		ipAddress: "192.168.1.139",
-		position:  position{x: 0, y: 0},
-	},
-	{
-		ipAddress: "192.168.1.138",
-		position:  position{x: 1, y: 0},
-	},
-}
+var baldosas = make(map[position]baldosaServer)
 
 var baldosaPort = 1234
 
@@ -63,15 +55,21 @@ func startGrpcServer() {
 	}
 }
 
+var sensors = make(map[position]bool)
 var sensorsMutex sync.Mutex
 
-func readMessages(conn net.Conn, stop chan bool) {
+var lights = make(map[position]protocol.Light)
+var lightsMutex sync.Mutex
+
+func readMessages(pos position, baldosa baldosaServer) {
 	// read bytes one by one
+	fmt.Println("Reading messages from", baldosa.ipAddress)
 	for {
 		select {
-		case <-stop:
+		case <-baldosa.stopChannel:
 			return
 		default:
+			conn := baldosa.connection
 			buf := make([]byte, 1)
 			_, err := conn.Read(buf)
 			if err != nil {
@@ -118,7 +116,7 @@ func readMessages(conn net.Conn, stop chan bool) {
 			// process payload
 			switch messageType {
 			case protocol.MessageTypePong:
-				// fmt.Println("Received pong")
+				fmt.Println("Received pong")
 			case protocol.MessageTypeSensorsStatus:
 				fmt.Println("Received sensors status")
 				sensorsMutex.Lock()
@@ -127,80 +125,110 @@ func readMessages(conn net.Conn, stop chan bool) {
 				for i := 0; i < entries; i++ {
 					index := payload[i*2]
 					value := payload[i*2+1]
-					fmt.Println("Sensor", index, "value", value)
+					sensors[indexToPosition(int(index), pos)] = value == 1
 				}
 				sensorsMutex.Unlock()
+			case protocol.MessageTypeLightsStatus:
+				fmt.Println("Received lights status")
+				lightsMutex.Lock()
+				entries := len(payload) / 7
+				for i := 0; i < entries; i++ {
+					index := payload[i*7]
+					off := protocol.Color{
+						R: payload[i*7+1],
+						G: payload[i*7+2],
+						B: payload[i*7+3],
+					}
+					on := protocol.Color{
+						R: payload[i*7+4],
+						G: payload[i*7+5],
+						B: payload[i*7+6],
+					}
+					lights[indexToPosition(int(index), pos)] = protocol.Light{
+						On:  on,
+						Off: off,
+					}
+				}
+				lightsMutex.Unlock()
 			default:
-				fmt.Println("Error: unknown message type:", payload[0])
+				fmt.Println("Error: unknown message type:", messageType)
 			}
 		}
+	}
+}
+
+func indexToPosition(index int, positionOf3x3 position) position {
+	return position{
+		x: positionOf3x3.x*3 + index%3,
+		y: positionOf3x3.y*3 + index/3,
 	}
 }
 
 func main() {
-	sensors := make(map[position]bool)
-	for _, entry := range baldosas {
-		initialPosition := position{
-			x: entry.position.x * 3,
-			y: entry.position.y * 3,
-		}
-		for i := 0; i < 3; i++ {
-			for j := 0; j < 3; j++ {
-				position := position{x: initialPosition.x + i, y: initialPosition.y + j}
-				if _, ok := sensors[position]; ok {
-					fmt.Println("Error: repeated position", position)
-					return
-				}
-				sensors[position] = false
+	go startGrpcServer()
+
+	// initialize baldosas
+	baldosas[position{x: 0, y: 0}] = baldosaServer{ipAddress: "192.168.1.139"}
+
+	// initialize sensors and lights
+	for key := range baldosas {
+		for i := 0; i < 9; i++ {
+			sensors[indexToPosition(i, key)] = false
+			lights[indexToPosition(i, key)] = protocol.Light{
+				On:  protocol.Color{R: 255, G: 255, B: 255},
+				Off: protocol.Color{R: 0, G: 0, B: 0},
 			}
 		}
 	}
-	// print sensors
-	for key, value := range sensors {
-		fmt.Println("Sensor", key, "value", value)
-	}
-	// start grpc server
-	go startGrpcServer()
 
-	connections := make([]net.Conn, len(baldosas))
-	stopChannels := make([]chan bool, len(baldosas))
-	for i, server := range baldosas {
-		stopChannels[i] = make(chan bool)
-		go func(i int, this baldosa) {
+	for pos, baldosa := range baldosas {
+		baldosas[pos] = baldosaServer{
+			ipAddress:   baldosa.ipAddress,
+			connection:  nil,
+			stopChannel: make(chan bool),
+		}
+
+		go func(pos position, baldosa baldosaServer) {
 			for {
-				if connections[i] != nil {
-					err := sendPing(connections[i])
+				if baldosa.connection != nil {
+					err := protocol.SendMessage(baldosa.connection, protocol.Ping())
 					if err != nil {
 						fmt.Println("Error sending ping:", err)
-						connections[i] = nil
-						stopChannels[i] <- true
+						baldosa.connection = nil
+						baldosa.stopChannel <- true
 					}
 					time.Sleep(1 * time.Second)
 				} else {
-					fmt.Println("Connecting to", this.ipAddress, "on port", baldosaPort)
-					conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", this.ipAddress, baldosaPort))
+					fmt.Println("Connecting to", baldosa.ipAddress, "on port", baldosaPort)
+					conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", baldosa.ipAddress, baldosaPort))
 					if err != nil {
 						fmt.Println("Error establishing connection:", err)
-						connections[i] = nil
-						if stopChannels[i] != nil {
-							close(stopChannels[i])
-							stopChannels[i] = nil
+						baldosa.connection = nil
+						if baldosa.stopChannel != nil {
+							close(baldosa.stopChannel)
+							baldosa.stopChannel = nil
 						}
 					} else {
-						fmt.Println("Connected to", this.ipAddress, "on port", baldosaPort)
-						connections[i] = conn
-						stopChannels[i] = make(chan bool)
-						go readMessages(conn, stopChannels[i])
+						fmt.Println("Connected to", baldosa.ipAddress, "on port", baldosaPort)
+						baldosa.connection = conn
+						baldosa.stopChannel = make(chan bool)
+
+						go readMessages(pos, baldosa)
+
+						err := protocol.SendMessage(baldosa.connection, protocol.RequestSensorsStatus())
+						if err != nil {
+							fmt.Println("Error sending message:", err)
+						}
+
+						err = protocol.SendMessage(baldosa.connection, protocol.RequestLightsStatus())
+						if err != nil {
+							fmt.Println("Error sending message:", err)
+						}
 					}
 				}
 			}
-		}(i, server)
+		}(pos, baldosa)
 	}
 
 	select {} // Block forever
-}
-
-func sendPing(conn net.Conn) error {
-	_, err := conn.Write(protocol.Ping())
-	return err
 }

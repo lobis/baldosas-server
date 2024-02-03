@@ -1,5 +1,16 @@
 package protocol
 
+import "net"
+
+type Color struct {
+	R, G, B uint8
+}
+
+type Light struct {
+	On  Color
+	Off Color
+}
+
 const (
 	MessageBegin = 0x0B
 	MessageEnd   = 0x0A
@@ -21,6 +32,19 @@ func formatMessage(payload []byte) []byte {
 	return append([]byte{MessageBegin, byte(length)}, append(payload, MessageEnd)...)
 }
 
+func SendMessage(conn net.Conn, payload []byte) error {
+	_, err := conn.Write(formatMessage(payload))
+	return err
+}
+
 func Ping() []byte {
 	return formatMessage([]byte{MessageTypePing})
+}
+
+func RequestSensorsStatus() []byte {
+	return formatMessage([]byte{MessageTypeSensorsRequest})
+}
+
+func RequestLightsStatus() []byte {
+	return formatMessage([]byte{MessageTypeLightsRequest})
 }
