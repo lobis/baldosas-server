@@ -14,3 +14,39 @@ message Empty {}
 message Status {
   int32 connectedClients = 1;
 }
+
+message Position {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message Color {
+  int32 r = 1;
+  int32 g = 2;
+  int32 b = 3;
+}
+
+message LightStatus {
+  Color onColor = 1;
+  Color offColor = 2;
+}
+
+message SensorStatus {
+  Position position = 1;
+  bool status = 2;
+}
+
+message LightStatusUpdate {
+  Position position = 1;
+  LightStatus status = 2;
+}
+
+// server stream sends sensor status updates
+service SensorService {
+  rpc GetSensorStatusUpdates(Empty) returns (stream SensorStatus) {}
+}
+
+// server stream sends light status updates
+service LightService {
+  rpc GetLightStatusUpdates(Empty) returns (stream LightStatusUpdate) {}
+}

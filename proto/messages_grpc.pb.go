@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.2
-// source: messages.proto
+// source: proto/messages.proto
 
 package proto
 
@@ -105,5 +105,239 @@ var StatusService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "messages.proto",
+	Metadata: "proto/messages.proto",
+}
+
+const (
+	SensorService_GetSensorStatusUpdates_FullMethodName = "/main.SensorService/GetSensorStatusUpdates"
+)
+
+// SensorServiceClient is the client API for SensorService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type SensorServiceClient interface {
+	GetSensorStatusUpdates(ctx context.Context, in *Empty, opts ...grpc.CallOption) (SensorService_GetSensorStatusUpdatesClient, error)
+}
+
+type sensorServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSensorServiceClient(cc grpc.ClientConnInterface) SensorServiceClient {
+	return &sensorServiceClient{cc}
+}
+
+func (c *sensorServiceClient) GetSensorStatusUpdates(ctx context.Context, in *Empty, opts ...grpc.CallOption) (SensorService_GetSensorStatusUpdatesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SensorService_ServiceDesc.Streams[0], SensorService_GetSensorStatusUpdates_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &sensorServiceGetSensorStatusUpdatesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type SensorService_GetSensorStatusUpdatesClient interface {
+	Recv() (*SensorStatus, error)
+	grpc.ClientStream
+}
+
+type sensorServiceGetSensorStatusUpdatesClient struct {
+	grpc.ClientStream
+}
+
+func (x *sensorServiceGetSensorStatusUpdatesClient) Recv() (*SensorStatus, error) {
+	m := new(SensorStatus)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// SensorServiceServer is the server API for SensorService service.
+// All implementations must embed UnimplementedSensorServiceServer
+// for forward compatibility
+type SensorServiceServer interface {
+	GetSensorStatusUpdates(*Empty, SensorService_GetSensorStatusUpdatesServer) error
+	mustEmbedUnimplementedSensorServiceServer()
+}
+
+// UnimplementedSensorServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedSensorServiceServer struct {
+}
+
+func (UnimplementedSensorServiceServer) GetSensorStatusUpdates(*Empty, SensorService_GetSensorStatusUpdatesServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetSensorStatusUpdates not implemented")
+}
+func (UnimplementedSensorServiceServer) mustEmbedUnimplementedSensorServiceServer() {}
+
+// UnsafeSensorServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SensorServiceServer will
+// result in compilation errors.
+type UnsafeSensorServiceServer interface {
+	mustEmbedUnimplementedSensorServiceServer()
+}
+
+func RegisterSensorServiceServer(s grpc.ServiceRegistrar, srv SensorServiceServer) {
+	s.RegisterService(&SensorService_ServiceDesc, srv)
+}
+
+func _SensorService_GetSensorStatusUpdates_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(SensorServiceServer).GetSensorStatusUpdates(m, &sensorServiceGetSensorStatusUpdatesServer{stream})
+}
+
+type SensorService_GetSensorStatusUpdatesServer interface {
+	Send(*SensorStatus) error
+	grpc.ServerStream
+}
+
+type sensorServiceGetSensorStatusUpdatesServer struct {
+	grpc.ServerStream
+}
+
+func (x *sensorServiceGetSensorStatusUpdatesServer) Send(m *SensorStatus) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+// SensorService_ServiceDesc is the grpc.ServiceDesc for SensorService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var SensorService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "main.SensorService",
+	HandlerType: (*SensorServiceServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetSensorStatusUpdates",
+			Handler:       _SensorService_GetSensorStatusUpdates_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "proto/messages.proto",
+}
+
+const (
+	LightService_GetLightStatusUpdates_FullMethodName = "/main.LightService/GetLightStatusUpdates"
+)
+
+// LightServiceClient is the client API for LightService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type LightServiceClient interface {
+	GetLightStatusUpdates(ctx context.Context, in *Empty, opts ...grpc.CallOption) (LightService_GetLightStatusUpdatesClient, error)
+}
+
+type lightServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewLightServiceClient(cc grpc.ClientConnInterface) LightServiceClient {
+	return &lightServiceClient{cc}
+}
+
+func (c *lightServiceClient) GetLightStatusUpdates(ctx context.Context, in *Empty, opts ...grpc.CallOption) (LightService_GetLightStatusUpdatesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LightService_ServiceDesc.Streams[0], LightService_GetLightStatusUpdates_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &lightServiceGetLightStatusUpdatesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type LightService_GetLightStatusUpdatesClient interface {
+	Recv() (*LightStatusUpdate, error)
+	grpc.ClientStream
+}
+
+type lightServiceGetLightStatusUpdatesClient struct {
+	grpc.ClientStream
+}
+
+func (x *lightServiceGetLightStatusUpdatesClient) Recv() (*LightStatusUpdate, error) {
+	m := new(LightStatusUpdate)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// LightServiceServer is the server API for LightService service.
+// All implementations must embed UnimplementedLightServiceServer
+// for forward compatibility
+type LightServiceServer interface {
+	GetLightStatusUpdates(*Empty, LightService_GetLightStatusUpdatesServer) error
+	mustEmbedUnimplementedLightServiceServer()
+}
+
+// UnimplementedLightServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedLightServiceServer struct {
+}
+
+func (UnimplementedLightServiceServer) GetLightStatusUpdates(*Empty, LightService_GetLightStatusUpdatesServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetLightStatusUpdates not implemented")
+}
+func (UnimplementedLightServiceServer) mustEmbedUnimplementedLightServiceServer() {}
+
+// UnsafeLightServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to LightServiceServer will
+// result in compilation errors.
+type UnsafeLightServiceServer interface {
+	mustEmbedUnimplementedLightServiceServer()
+}
+
+func RegisterLightServiceServer(s grpc.ServiceRegistrar, srv LightServiceServer) {
+	s.RegisterService(&LightService_ServiceDesc, srv)
+}
+
+func _LightService_GetLightStatusUpdates_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LightServiceServer).GetLightStatusUpdates(m, &lightServiceGetLightStatusUpdatesServer{stream})
+}
+
+type LightService_GetLightStatusUpdatesServer interface {
+	Send(*LightStatusUpdate) error
+	grpc.ServerStream
+}
+
+type lightServiceGetLightStatusUpdatesServer struct {
+	grpc.ServerStream
+}
+
+func (x *lightServiceGetLightStatusUpdatesServer) Send(m *LightStatusUpdate) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+// LightService_ServiceDesc is the grpc.ServiceDesc for LightService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var LightService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "main.LightService",
+	HandlerType: (*LightServiceServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetLightStatusUpdates",
+			Handler:       _LightService_GetLightStatusUpdates_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "proto/messages.proto",
 }

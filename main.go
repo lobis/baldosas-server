@@ -27,15 +27,41 @@ var baldosaPort = 1234
 
 type grpcServer struct {
 	pb.UnimplementedStatusServiceServer
+	pb.UnimplementedSensorServiceServer
+	pb.UnimplementedLightServiceServer
 }
 
 func (s *grpcServer) GetConnectedClients(ctx context.Context, req *pb.Empty) (*pb.Status, error) {
 	return &pb.Status{ConnectedClients: 10}, nil
 }
 
+func (s *grpcServer) GetSensorStatusUpdates(empty *pb.Empty, stream pb.SensorService_GetSensorStatusUpdatesServer) error {
+	for {
+		// Implement the logic to send sensor status updates to the client stream
+		sensorsMutex.Lock()
+		for pos, value := range sensors {
+			err := stream.Send(&pb.SensorStatus{Position: &pb.Position{X: int32(pos.x), Y: int32(pos.y)}, Status: value})
+			if err != nil {
+				fmt.Println("Error sending sensor status:", err)
+				sensorsMutex.Unlock()
+				return err
+			}
+		}
+		sensorsMutex.Unlock()
+		time.Sleep(1 * time.Second)
+	}
+}
+
+func (s *grpcServer) GetLightStatusUpdates(empty *pb.Empty, stream pb.LightService_GetLightStatusUpdatesServer) error {
+	// Implement the logic to send light status updates to the client stream
+	return nil
+}
+
 func startGrpcServer() {
 	server := grpc.NewServer()
 	pb.RegisterStatusServiceServer(server, &grpcServer{})
+	pb.RegisterSensorServiceServer(server, &grpcServer{})
+	pb.RegisterLightServiceServer(server, &grpcServer{})
 	// start tcp server
 	listen, err := net.Listen("tcp", ":50051")
 	if err != nil {

@@ -67,3 +67,131 @@ class StatusService(object):
             messages__pb2.Status.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+
+class SensorServiceStub(object):
+    """server stream sends sensor status updates
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.GetSensorStatusUpdates = channel.unary_stream(
+                '/main.SensorService/GetSensorStatusUpdates',
+                request_serializer=messages__pb2.Empty.SerializeToString,
+                response_deserializer=messages__pb2.SensorStatus.FromString,
+                )
+
+
+class SensorServiceServicer(object):
+    """server stream sends sensor status updates
+    """
+
+    def GetSensorStatusUpdates(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_SensorServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'GetSensorStatusUpdates': grpc.unary_stream_rpc_method_handler(
+                    servicer.GetSensorStatusUpdates,
+                    request_deserializer=messages__pb2.Empty.FromString,
+                    response_serializer=messages__pb2.SensorStatus.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'main.SensorService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+ # This class is part of an EXPERIMENTAL API.
+class SensorService(object):
+    """server stream sends sensor status updates
+    """
+
+    @staticmethod
+    def GetSensorStatusUpdates(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(request, target, '/main.SensorService/GetSensorStatusUpdates',
+            messages__pb2.Empty.SerializeToString,
+            messages__pb2.SensorStatus.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+
+class LightServiceStub(object):
+    """server stream sends light status updates
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.GetLightStatusUpdates = channel.unary_stream(
+                '/main.LightService/GetLightStatusUpdates',
+                request_serializer=messages__pb2.Empty.SerializeToString,
+                response_deserializer=messages__pb2.LightStatusUpdate.FromString,
+                )
+
+
+class LightServiceServicer(object):
+    """server stream sends light status updates
+    """
+
+    def GetLightStatusUpdates(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_LightServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'GetLightStatusUpdates': grpc.unary_stream_rpc_method_handler(
+                    servicer.GetLightStatusUpdates,
+                    request_deserializer=messages__pb2.Empty.FromString,
+                    response_serializer=messages__pb2.LightStatusUpdate.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'main.LightService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+ # This class is part of an EXPERIMENTAL API.
+class LightService(object):
+    """server stream sends light status updates
+    """
+
+    @staticmethod
+    def GetLightStatusUpdates(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(request, target, '/main.LightService/GetLightStatusUpdates',
+            messages__pb2.Empty.SerializeToString,
+            messages__pb2.LightStatusUpdate.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
