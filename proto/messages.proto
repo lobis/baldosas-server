@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "github.com/lobis/baldosas-server/proto";
+
+package main;
+
+// get the number of connected clients
+service StatusService {
+  rpc GetConnectedClients(Empty) returns (Status) {}
+}
+
+message Empty {}
+
+message Status {
+  int32 connectedClients = 1;
+}
