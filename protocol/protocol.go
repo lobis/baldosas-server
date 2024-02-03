@@ -48,3 +48,17 @@ func RequestSensorsStatus() []byte {
 func RequestLightsStatus() []byte {
 	return formatMessage([]byte{MessageTypeLightsRequest})
 }
+
+func SetBrightness(brightness uint8) []byte {
+	return formatMessage([]byte{MessageTypeLightsBrightnessSet, brightness})
+}
+
+func SetLights(lights map[int]Light) []byte {
+	payload := []byte{MessageTypeLightsSet}
+	for i, light := range lights {
+		payload = append(payload, byte(i))
+		payload = append(payload, light.Off.R, light.Off.G, light.Off.B)
+		payload = append(payload, light.On.R, light.On.G, light.On.B)
+	}
+	return formatMessage(payload)
+}

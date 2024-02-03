@@ -26,13 +26,67 @@ var baldosas = make(map[position]baldosaServer)
 var baldosaPort = 1234
 
 type grpcServer struct {
-	pb.UnimplementedStatusServiceServer
+	pb.UnimplementedPositionsServiceServer
 	pb.UnimplementedSensorServiceServer
 	pb.UnimplementedLightServiceServer
+	pb.UnimplementedSetLightsServiceServer
 }
 
-func (s *grpcServer) GetConnectedClients(ctx context.Context, _ *pb.Empty) (*pb.Status, error) {
-	return &pb.Status{ConnectedClients: 10}, nil
+func (s *grpcServer) GetPositions(_ context.Context, _ *pb.Empty) (*pb.Positions, error) {
+	// iterate over the keys of baldosas to build positions
+	positions := make([]*pb.Position, 0)
+	lightsMutex.Lock()
+	for pos := range lights {
+		positions = append(positions, &pb.Position{X: int32(pos.x), Y: int32(pos.y)})
+	}
+	lightsMutex.Unlock()
+	return &pb.Positions{Positions: positions}, nil
+}
+
+func (s *grpcServer) SetLights(_ context.Context, in *pb.LightsStatus) (*pb.Empty, error) {
+	lightsMap := make(map[position]map[int]protocol.Light) // 3x3 to index to light
+	lightsMutex.Lock()
+	for _, light := range in.Lights {
+		pos := position{x: int(light.Position.X), y: int(light.Position.Y)}
+		positionSmall := positionBigToSmall(pos)
+		index := positionToIndex(pos)
+
+		if lightsMap[positionSmall] == nil {
+			lightsMap[positionSmall] = make(map[int]protocol.Light)
+		}
+		lightsMap[positionSmall][index] = protocol.Light{
+			On: protocol.Color{
+				R: uint8(light.Status.On.R),
+				G: uint8(light.Status.On.G),
+				B: uint8(light.Status.On.B),
+			},
+			Off: protocol.Color{
+				R: uint8(light.Status.Off.R),
+				G: uint8(light.Status.Off.G),
+				B: uint8(light.Status.Off.B),
+			},
+		}
+	}
+	fmt.Println("CONNECTIONS:", baldosas)
+	for pos, lights3x3 := range lightsMap {
+		baldosa := baldosas[pos]
+		fmt.Println("Setting lights for", pos, "on", baldosa.ipAddress, "to", lights3x3, "connection:", baldosa.connection)
+		// TODO: why is connection nil if we are connected??
+		if baldosa.connection != nil {
+			go func(baldosa baldosaServer, lights map[int]protocol.Light) {
+				err := protocol.SendMessage(baldosa.connection, protocol.SetLights(lights))
+				if err != nil {
+					fmt.Println("Error sending message:", err)
+				}
+				err = protocol.SendMessage(baldosa.connection, protocol.RequestLightsStatus())
+				if err != nil {
+					fmt.Println("Error sending message:", err)
+				}
+			}(baldosa, lights3x3)
+		}
+	}
+	lightsMutex.Unlock()
+	return &pb.Empty{}, nil
 }
 
 func (s *grpcServer) GetSensorStatusUpdates(_ *pb.Empty, stream pb.SensorService_GetSensorStatusUpdatesServer) error {
@@ -67,9 +121,10 @@ func (s *grpcServer) GetLightStatusUpdates(_ *pb.Empty, stream pb.LightService_G
 
 func startGrpcServer() {
 	server := grpc.NewServer()
-	pb.RegisterStatusServiceServer(server, &grpcServer{})
+	pb.RegisterPositionsServiceServer(server, &grpcServer{})
 	pb.RegisterSensorServiceServer(server, &grpcServer{})
 	pb.RegisterLightServiceServer(server, &grpcServer{})
+	pb.RegisterSetLightsServiceServer(server, &grpcServer{})
 	// start tcp server
 	listen, err := net.Listen("tcp", ":50051")
 	if err != nil {
@@ -216,6 +271,17 @@ func indexToPosition(index int, positionOf3x3 position) position {
 	}
 }
 
+func positionBigToSmall(pos position) position {
+	return position{
+		x: pos.x / 3,
+		y: pos.y / 3,
+	}
+}
+
+func positionToIndex(pos position) int {
+	return (pos.x%3)%3 + (pos.y%3)*3
+}
+
 func main() {
 	go startGrpcServer()
 
@@ -262,6 +328,7 @@ func main() {
 						}
 					} else {
 						fmt.Println("Connected to", baldosa.ipAddress, "on port", baldosaPort)
+						// TODO: its not updating the global variable
 						baldosa.connection = conn
 						baldosa.stopChannel = make(chan bool)
 

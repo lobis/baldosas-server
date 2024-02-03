@@ -19,89 +19,89 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	StatusService_GetConnectedClients_FullMethodName = "/main.StatusService/GetConnectedClients"
+	PositionsService_GetPositions_FullMethodName = "/main.PositionsService/GetPositions"
 )
 
-// StatusServiceClient is the client API for StatusService service.
+// PositionsServiceClient is the client API for PositionsService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type StatusServiceClient interface {
-	GetConnectedClients(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Status, error)
+type PositionsServiceClient interface {
+	GetPositions(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Positions, error)
 }
 
-type statusServiceClient struct {
+type positionsServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewStatusServiceClient(cc grpc.ClientConnInterface) StatusServiceClient {
-	return &statusServiceClient{cc}
+func NewPositionsServiceClient(cc grpc.ClientConnInterface) PositionsServiceClient {
+	return &positionsServiceClient{cc}
 }
 
-func (c *statusServiceClient) GetConnectedClients(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Status, error) {
-	out := new(Status)
-	err := c.cc.Invoke(ctx, StatusService_GetConnectedClients_FullMethodName, in, out, opts...)
+func (c *positionsServiceClient) GetPositions(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Positions, error) {
+	out := new(Positions)
+	err := c.cc.Invoke(ctx, PositionsService_GetPositions_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// StatusServiceServer is the server API for StatusService service.
-// All implementations must embed UnimplementedStatusServiceServer
+// PositionsServiceServer is the server API for PositionsService service.
+// All implementations must embed UnimplementedPositionsServiceServer
 // for forward compatibility
-type StatusServiceServer interface {
-	GetConnectedClients(context.Context, *Empty) (*Status, error)
-	mustEmbedUnimplementedStatusServiceServer()
+type PositionsServiceServer interface {
+	GetPositions(context.Context, *Empty) (*Positions, error)
+	mustEmbedUnimplementedPositionsServiceServer()
 }
 
-// UnimplementedStatusServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedStatusServiceServer struct {
+// UnimplementedPositionsServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedPositionsServiceServer struct {
 }
 
-func (UnimplementedStatusServiceServer) GetConnectedClients(context.Context, *Empty) (*Status, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConnectedClients not implemented")
+func (UnimplementedPositionsServiceServer) GetPositions(context.Context, *Empty) (*Positions, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPositions not implemented")
 }
-func (UnimplementedStatusServiceServer) mustEmbedUnimplementedStatusServiceServer() {}
+func (UnimplementedPositionsServiceServer) mustEmbedUnimplementedPositionsServiceServer() {}
 
-// UnsafeStatusServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to StatusServiceServer will
+// UnsafePositionsServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to PositionsServiceServer will
 // result in compilation errors.
-type UnsafeStatusServiceServer interface {
-	mustEmbedUnimplementedStatusServiceServer()
+type UnsafePositionsServiceServer interface {
+	mustEmbedUnimplementedPositionsServiceServer()
 }
 
-func RegisterStatusServiceServer(s grpc.ServiceRegistrar, srv StatusServiceServer) {
-	s.RegisterService(&StatusService_ServiceDesc, srv)
+func RegisterPositionsServiceServer(s grpc.ServiceRegistrar, srv PositionsServiceServer) {
+	s.RegisterService(&PositionsService_ServiceDesc, srv)
 }
 
-func _StatusService_GetConnectedClients_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _PositionsService_GetPositions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StatusServiceServer).GetConnectedClients(ctx, in)
+		return srv.(PositionsServiceServer).GetPositions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: StatusService_GetConnectedClients_FullMethodName,
+		FullMethod: PositionsService_GetPositions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StatusServiceServer).GetConnectedClients(ctx, req.(*Empty))
+		return srv.(PositionsServiceServer).GetPositions(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// StatusService_ServiceDesc is the grpc.ServiceDesc for StatusService service.
+// PositionsService_ServiceDesc is the grpc.ServiceDesc for PositionsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var StatusService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "main.StatusService",
-	HandlerType: (*StatusServiceServer)(nil),
+var PositionsService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "main.PositionsService",
+	HandlerType: (*PositionsServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetConnectedClients",
-			Handler:    _StatusService_GetConnectedClients_Handler,
+			MethodName: "GetPositions",
+			Handler:    _PositionsService_GetPositions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -339,5 +339,95 @@ var LightService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
+	Metadata: "proto/messages.proto",
+}
+
+const (
+	SetLightsService_SetLights_FullMethodName = "/main.SetLightsService/SetLights"
+)
+
+// SetLightsServiceClient is the client API for SetLightsService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type SetLightsServiceClient interface {
+	SetLights(ctx context.Context, in *LightsStatus, opts ...grpc.CallOption) (*Empty, error)
+}
+
+type setLightsServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSetLightsServiceClient(cc grpc.ClientConnInterface) SetLightsServiceClient {
+	return &setLightsServiceClient{cc}
+}
+
+func (c *setLightsServiceClient) SetLights(ctx context.Context, in *LightsStatus, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, SetLightsService_SetLights_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SetLightsServiceServer is the server API for SetLightsService service.
+// All implementations must embed UnimplementedSetLightsServiceServer
+// for forward compatibility
+type SetLightsServiceServer interface {
+	SetLights(context.Context, *LightsStatus) (*Empty, error)
+	mustEmbedUnimplementedSetLightsServiceServer()
+}
+
+// UnimplementedSetLightsServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedSetLightsServiceServer struct {
+}
+
+func (UnimplementedSetLightsServiceServer) SetLights(context.Context, *LightsStatus) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetLights not implemented")
+}
+func (UnimplementedSetLightsServiceServer) mustEmbedUnimplementedSetLightsServiceServer() {}
+
+// UnsafeSetLightsServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SetLightsServiceServer will
+// result in compilation errors.
+type UnsafeSetLightsServiceServer interface {
+	mustEmbedUnimplementedSetLightsServiceServer()
+}
+
+func RegisterSetLightsServiceServer(s grpc.ServiceRegistrar, srv SetLightsServiceServer) {
+	s.RegisterService(&SetLightsService_ServiceDesc, srv)
+}
+
+func _SetLightsService_SetLights_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LightsStatus)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SetLightsServiceServer).SetLights(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SetLightsService_SetLights_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SetLightsServiceServer).SetLights(ctx, req.(*LightsStatus))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// SetLightsService_ServiceDesc is the grpc.ServiceDesc for SetLightsService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var SetLightsService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "main.SetLightsService",
+	HandlerType: (*SetLightsServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "SetLights",
+			Handler:    _SetLightsService_SetLights_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "proto/messages.proto",
 }

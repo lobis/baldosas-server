@@ -5,9 +5,8 @@ import grpc
 import messages_pb2 as messages__pb2
 
 
-class StatusServiceStub(object):
-    """get the number of connected clients
-    """
+class PositionsServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
         """Constructor.
@@ -15,44 +14,42 @@ class StatusServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetConnectedClients = channel.unary_unary(
-                '/main.StatusService/GetConnectedClients',
+        self.GetPositions = channel.unary_unary(
+                '/main.PositionsService/GetPositions',
                 request_serializer=messages__pb2.Empty.SerializeToString,
-                response_deserializer=messages__pb2.Status.FromString,
+                response_deserializer=messages__pb2.Positions.FromString,
                 )
 
 
-class StatusServiceServicer(object):
-    """get the number of connected clients
-    """
+class PositionsServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
 
-    def GetConnectedClients(self, request, context):
+    def GetPositions(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_StatusServiceServicer_to_server(servicer, server):
+def add_PositionsServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetConnectedClients': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetConnectedClients,
+            'GetPositions': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetPositions,
                     request_deserializer=messages__pb2.Empty.FromString,
-                    response_serializer=messages__pb2.Status.SerializeToString,
+                    response_serializer=messages__pb2.Positions.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'main.StatusService', rpc_method_handlers)
+            'main.PositionsService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class StatusService(object):
-    """get the number of connected clients
-    """
+class PositionsService(object):
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetConnectedClients(request,
+    def GetPositions(request,
             target,
             options=(),
             channel_credentials=None,
@@ -62,9 +59,9 @@ class StatusService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/main.StatusService/GetConnectedClients',
+        return grpc.experimental.unary_unary(request, target, '/main.PositionsService/GetPositions',
             messages__pb2.Empty.SerializeToString,
-            messages__pb2.Status.FromString,
+            messages__pb2.Positions.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -193,5 +190,66 @@ class LightService(object):
         return grpc.experimental.unary_stream(request, target, '/main.LightService/GetLightStatusUpdates',
             messages__pb2.Empty.SerializeToString,
             messages__pb2.LightStatus.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+
+class SetLightsServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.SetLights = channel.unary_unary(
+                '/main.SetLightsService/SetLights',
+                request_serializer=messages__pb2.LightsStatus.SerializeToString,
+                response_deserializer=messages__pb2.Empty.FromString,
+                )
+
+
+class SetLightsServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def SetLights(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_SetLightsServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'SetLights': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetLights,
+                    request_deserializer=messages__pb2.LightsStatus.FromString,
+                    response_serializer=messages__pb2.Empty.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'main.SetLightsService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+ # This class is part of an EXPERIMENTAL API.
+class SetLightsService(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def SetLights(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/main.SetLightsService/SetLights',
+            messages__pb2.LightsStatus.SerializeToString,
+            messages__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

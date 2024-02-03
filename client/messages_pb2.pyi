@@ -1,6 +1,7 @@
+from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
-from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Optional, Union as _Union
+from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Mapping, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
@@ -8,11 +9,11 @@ class Empty(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
 
-class Status(_message.Message):
-    __slots__ = ("connectedClients",)
-    CONNECTEDCLIENTS_FIELD_NUMBER: _ClassVar[int]
-    connectedClients: int
-    def __init__(self, connectedClients: _Optional[int] = ...) -> None: ...
+class Positions(_message.Message):
+    __slots__ = ("positions",)
+    POSITIONS_FIELD_NUMBER: _ClassVar[int]
+    positions: _containers.RepeatedCompositeFieldContainer[Position]
+    def __init__(self, positions: _Optional[_Iterable[_Union[Position, _Mapping]]] = ...) -> None: ...
 
 class Position(_message.Message):
     __slots__ = ("x", "y")
@@ -47,6 +48,12 @@ class LightStatus(_message.Message):
     position: Position
     status: Light
     def __init__(self, position: _Optional[_Union[Position, _Mapping]] = ..., status: _Optional[_Union[Light, _Mapping]] = ...) -> None: ...
+
+class LightsStatus(_message.Message):
+    __slots__ = ("lights",)
+    LIGHTS_FIELD_NUMBER: _ClassVar[int]
+    lights: _containers.RepeatedCompositeFieldContainer[LightStatus]
+    def __init__(self, lights: _Optional[_Iterable[_Union[LightStatus, _Mapping]]] = ...) -> None: ...
 
 class SensorStatus(_message.Message):
     __slots__ = ("position", "status")
