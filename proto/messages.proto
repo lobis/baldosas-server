@@ -26,19 +26,19 @@ message Color {
   int32 b = 3;
 }
 
+message Light {
+  Color on = 1;
+  Color off = 2;
+}
+
 message LightStatus {
-  Color onColor = 1;
-  Color offColor = 2;
+  Position position = 1;
+  Light status = 2;
 }
 
 message SensorStatus {
   Position position = 1;
   bool status = 2;
-}
-
-message LightStatusUpdate {
-  Position position = 1;
-  LightStatus status = 2;
 }
 
 // server stream sends sensor status updates
@@ -48,5 +48,5 @@ service SensorService {
 
 // server stream sends light status updates
 service LightService {
-  rpc GetLightStatusUpdates(Empty) returns (stream LightStatusUpdate) {}
+  rpc GetLightStatusUpdates(Empty) returns (stream LightStatus) {}
 }

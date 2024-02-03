@@ -12,8 +12,12 @@ def main():
     sensor_status_stream = messages_grpc.SensorServiceStub(channel)
     sensor_status = sensor_status_stream.GetSensorStatusUpdates(messages.Empty())
 
-    # print the sensor status
-    for status in sensor_status:
+    # light status
+    light_status_stream = messages_grpc.LightServiceStub(channel)
+    light_status = light_status_stream.GetLightStatusUpdates(messages.Empty())
+
+    # print the light status
+    for status in light_status:
         print(status)
 
 

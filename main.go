@@ -31,30 +31,38 @@ type grpcServer struct {
 	pb.UnimplementedLightServiceServer
 }
 
-func (s *grpcServer) GetConnectedClients(ctx context.Context, req *pb.Empty) (*pb.Status, error) {
+func (s *grpcServer) GetConnectedClients(ctx context.Context, _ *pb.Empty) (*pb.Status, error) {
 	return &pb.Status{ConnectedClients: 10}, nil
 }
 
-func (s *grpcServer) GetSensorStatusUpdates(empty *pb.Empty, stream pb.SensorService_GetSensorStatusUpdatesServer) error {
+func (s *grpcServer) GetSensorStatusUpdates(_ *pb.Empty, stream pb.SensorService_GetSensorStatusUpdatesServer) error {
 	for {
-		// Implement the logic to send sensor status updates to the client stream
-		sensorsMutex.Lock()
-		for pos, value := range sensors {
-			err := stream.Send(&pb.SensorStatus{Position: &pb.Position{X: int32(pos.x), Y: int32(pos.y)}, Status: value})
+		select {
+		case pos := <-sensorsUpdateChannel:
+			sensorsMutex.Lock()
+			err := stream.Send(&pb.SensorStatus{Position: &pb.Position{X: int32(pos.x), Y: int32(pos.y)}, Status: sensors[pos]})
+			sensorsMutex.Unlock()
 			if err != nil {
 				fmt.Println("Error sending sensor status:", err)
-				sensorsMutex.Unlock()
 				return err
 			}
 		}
-		sensorsMutex.Unlock()
-		time.Sleep(1 * time.Second)
 	}
 }
 
-func (s *grpcServer) GetLightStatusUpdates(empty *pb.Empty, stream pb.LightService_GetLightStatusUpdatesServer) error {
-	// Implement the logic to send light status updates to the client stream
-	return nil
+func (s *grpcServer) GetLightStatusUpdates(_ *pb.Empty, stream pb.LightService_GetLightStatusUpdatesServer) error {
+	for {
+		select {
+		case pos := <-lightsUpdateChannel:
+			lightsMutex.Lock()
+			err := stream.Send(&pb.LightStatus{Position: &pb.Position{X: int32(pos.x), Y: int32(pos.y)}, Status: &pb.Light{On: &pb.Color{R: int32(lights[pos].On.R), G: int32(lights[pos].On.G), B: int32(lights[pos].On.B)}, Off: &pb.Color{R: int32(lights[pos].Off.R), G: int32(lights[pos].Off.G), B: int32(lights[pos].Off.B)}}})
+			lightsMutex.Unlock()
+			if err != nil {
+				fmt.Println("Error sending sensor status:", err)
+				return err
+			}
+		}
+	}
 }
 
 func startGrpcServer() {
@@ -83,9 +91,11 @@ func startGrpcServer() {
 
 var sensors = make(map[position]bool)
 var sensorsMutex sync.Mutex
+var sensorsUpdateChannel = make(chan position, 100)
 
 var lights = make(map[position]protocol.Light)
 var lightsMutex sync.Mutex
+var lightsUpdateChannel = make(chan position, 100)
 
 func readMessages(pos position, baldosa baldosaServer) {
 	// read bytes one by one
@@ -144,14 +154,22 @@ func readMessages(pos position, baldosa baldosaServer) {
 			case protocol.MessageTypePong:
 				fmt.Println("Received pong")
 			case protocol.MessageTypeSensorsStatus:
-				fmt.Println("Received sensors status")
+				// fmt.Println("Received sensors status")
 				sensorsMutex.Lock()
 				// entries are length of payload / 2
 				entries := len(payload) / 2
 				for i := 0; i < entries; i++ {
 					index := payload[i*2]
 					value := payload[i*2+1]
+					previousValue := sensors[indexToPosition(int(index), pos)]
 					sensors[indexToPosition(int(index), pos)] = value == 1
+					if previousValue != (value == 1) {
+						fmt.Println("Sensor", indexToPosition(int(index), pos), "changed to", value == 1)
+						select {
+						case sensorsUpdateChannel <- indexToPosition(int(index), pos):
+						default:
+						}
+					}
 				}
 				sensorsMutex.Unlock()
 			case protocol.MessageTypeLightsStatus:
@@ -170,9 +188,17 @@ func readMessages(pos position, baldosa baldosaServer) {
 						G: payload[i*7+5],
 						B: payload[i*7+6],
 					}
+					previousValue := lights[indexToPosition(int(index), pos)]
 					lights[indexToPosition(int(index), pos)] = protocol.Light{
 						On:  on,
 						Off: off,
+					}
+					if previousValue != lights[indexToPosition(int(index), pos)] {
+						fmt.Println("Light", indexToPosition(int(index), pos), "changed to", lights[indexToPosition(int(index), pos)])
+						select {
+						case lightsUpdateChannel <- indexToPosition(int(index), pos):
+						default:
+						}
 					}
 				}
 				lightsMutex.Unlock()

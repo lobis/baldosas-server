@@ -146,7 +146,7 @@ class LightServiceStub(object):
         self.GetLightStatusUpdates = channel.unary_stream(
                 '/main.LightService/GetLightStatusUpdates',
                 request_serializer=messages__pb2.Empty.SerializeToString,
-                response_deserializer=messages__pb2.LightStatusUpdate.FromString,
+                response_deserializer=messages__pb2.LightStatus.FromString,
                 )
 
 
@@ -166,7 +166,7 @@ def add_LightServiceServicer_to_server(servicer, server):
             'GetLightStatusUpdates': grpc.unary_stream_rpc_method_handler(
                     servicer.GetLightStatusUpdates,
                     request_deserializer=messages__pb2.Empty.FromString,
-                    response_serializer=messages__pb2.LightStatusUpdate.SerializeToString,
+                    response_serializer=messages__pb2.LightStatus.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -192,6 +192,6 @@ class LightService(object):
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/main.LightService/GetLightStatusUpdates',
             messages__pb2.Empty.SerializeToString,
-            messages__pb2.LightStatusUpdate.FromString,
+            messages__pb2.LightStatus.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

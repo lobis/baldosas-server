@@ -260,7 +260,7 @@ func (c *lightServiceClient) GetLightStatusUpdates(ctx context.Context, in *Empt
 }
 
 type LightService_GetLightStatusUpdatesClient interface {
-	Recv() (*LightStatusUpdate, error)
+	Recv() (*LightStatus, error)
 	grpc.ClientStream
 }
 
@@ -268,8 +268,8 @@ type lightServiceGetLightStatusUpdatesClient struct {
 	grpc.ClientStream
 }
 
-func (x *lightServiceGetLightStatusUpdatesClient) Recv() (*LightStatusUpdate, error) {
-	m := new(LightStatusUpdate)
+func (x *lightServiceGetLightStatusUpdatesClient) Recv() (*LightStatus, error) {
+	m := new(LightStatus)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -313,7 +313,7 @@ func _LightService_GetLightStatusUpdates_Handler(srv interface{}, stream grpc.Se
 }
 
 type LightService_GetLightStatusUpdatesServer interface {
-	Send(*LightStatusUpdate) error
+	Send(*LightStatus) error
 	grpc.ServerStream
 }
 
@@ -321,7 +321,7 @@ type lightServiceGetLightStatusUpdatesServer struct {
 	grpc.ServerStream
 }
 
-func (x *lightServiceGetLightStatusUpdatesServer) Send(m *LightStatusUpdate) error {
+func (x *lightServiceGetLightStatusUpdatesServer) Send(m *LightStatus) error {
 	return x.ServerStream.SendMsg(m)
 }
 
