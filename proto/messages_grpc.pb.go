@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.2
-// source: proto/messages.proto
+// source: messages.proto
 
 package proto
 
@@ -105,7 +105,7 @@ var PositionsService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/messages.proto",
+	Metadata: "messages.proto",
 }
 
 const (
@@ -222,7 +222,7 @@ var SensorService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "proto/messages.proto",
+	Metadata: "messages.proto",
 }
 
 const (
@@ -339,7 +339,7 @@ var LightService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "proto/messages.proto",
+	Metadata: "messages.proto",
 }
 
 const (
@@ -429,5 +429,5 @@ var SetLightsService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/messages.proto",
+	Metadata: "messages.proto",
 }

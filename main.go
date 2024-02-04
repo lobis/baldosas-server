@@ -23,7 +23,7 @@ type baldosaServer struct {
 
 var baldosas = make(map[position]baldosaServer)
 
-var baldosaPort = 1234
+var baldosaPort = 51234
 
 type grpcServer struct {
 	pb.UnimplementedPositionsServiceServer
@@ -171,6 +171,7 @@ func readMessages(pos position, baldosa baldosaServer) {
 				continue
 			}
 
+			fmt.Println("Reading message from", baldosa.ipAddress)
 			_, err = conn.Read(buf)
 			if err != nil {
 				fmt.Println("Error reading:", err)
@@ -309,13 +310,14 @@ func main() {
 		go func(pos position, baldosa baldosaServer) {
 			for {
 				if baldosa.connection != nil {
+					fmt.Println("Sending ping to", baldosa.ipAddress)
 					err := protocol.SendMessage(baldosa.connection, protocol.Ping())
 					if err != nil {
 						fmt.Println("Error sending ping:", err)
 						baldosa.connection = nil
 						baldosa.stopChannel <- true
 					}
-					time.Sleep(1 * time.Second)
+					time.Sleep(5 * time.Second)
 				} else {
 					fmt.Println("Connecting to", baldosa.ipAddress, "on port", baldosaPort)
 					conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", baldosa.ipAddress, baldosaPort))
