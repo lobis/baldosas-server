@@ -26,31 +26,31 @@ const (
 	MessageTypeLightsBrightnessRequest = 0x14
 )
 
-func formatMessage(payload []byte) []byte {
+func FormatMessage(payload []byte) []byte {
 	length := len(payload) - 1
 	// resulting message should be "start of message" + "length of message" + "payload" + "end of message"
 	return append([]byte{MessageBegin, byte(length)}, append(payload, MessageEnd)...)
 }
 
 func SendMessage(conn net.Conn, payload []byte) error {
-	_, err := conn.Write(formatMessage(payload))
+	_, err := conn.Write(FormatMessage(payload))
 	return err
 }
 
 func Ping() []byte {
-	return formatMessage([]byte{MessageTypePing})
+	return FormatMessage([]byte{MessageTypePing})
 }
 
 func RequestSensorsStatus() []byte {
-	return formatMessage([]byte{MessageTypeSensorsRequest})
+	return FormatMessage([]byte{MessageTypeSensorsRequest})
 }
 
 func RequestLightsStatus() []byte {
-	return formatMessage([]byte{MessageTypeLightsRequest})
+	return FormatMessage([]byte{MessageTypeLightsRequest})
 }
 
 func SetBrightness(brightness uint8) []byte {
-	return formatMessage([]byte{MessageTypeLightsBrightnessSet, brightness})
+	return FormatMessage([]byte{MessageTypeLightsBrightnessSet, brightness})
 }
 
 func SetLights(lights map[int]Light) []byte {
@@ -60,5 +60,5 @@ func SetLights(lights map[int]Light) []byte {
 		payload = append(payload, light.Off.R, light.Off.G, light.Off.B)
 		payload = append(payload, light.On.R, light.On.G, light.On.B)
 	}
-	return formatMessage(payload)
+	return FormatMessage(payload)
 }

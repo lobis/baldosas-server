@@ -431,3 +431,128 @@ var SetLightsService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "messages.proto",
 }
+
+const (
+	SetLightsStreamService_SetLightsStream_FullMethodName = "/main.SetLightsStreamService/SetLightsStream"
+)
+
+// SetLightsStreamServiceClient is the client API for SetLightsStreamService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type SetLightsStreamServiceClient interface {
+	SetLightsStream(ctx context.Context, opts ...grpc.CallOption) (SetLightsStreamService_SetLightsStreamClient, error)
+}
+
+type setLightsStreamServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSetLightsStreamServiceClient(cc grpc.ClientConnInterface) SetLightsStreamServiceClient {
+	return &setLightsStreamServiceClient{cc}
+}
+
+func (c *setLightsStreamServiceClient) SetLightsStream(ctx context.Context, opts ...grpc.CallOption) (SetLightsStreamService_SetLightsStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SetLightsStreamService_ServiceDesc.Streams[0], SetLightsStreamService_SetLightsStream_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &setLightsStreamServiceSetLightsStreamClient{stream}
+	return x, nil
+}
+
+type SetLightsStreamService_SetLightsStreamClient interface {
+	Send(*LightsStatus) error
+	CloseAndRecv() (*Empty, error)
+	grpc.ClientStream
+}
+
+type setLightsStreamServiceSetLightsStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *setLightsStreamServiceSetLightsStreamClient) Send(m *LightsStatus) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *setLightsStreamServiceSetLightsStreamClient) CloseAndRecv() (*Empty, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(Empty)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// SetLightsStreamServiceServer is the server API for SetLightsStreamService service.
+// All implementations must embed UnimplementedSetLightsStreamServiceServer
+// for forward compatibility
+type SetLightsStreamServiceServer interface {
+	SetLightsStream(SetLightsStreamService_SetLightsStreamServer) error
+	mustEmbedUnimplementedSetLightsStreamServiceServer()
+}
+
+// UnimplementedSetLightsStreamServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedSetLightsStreamServiceServer struct {
+}
+
+func (UnimplementedSetLightsStreamServiceServer) SetLightsStream(SetLightsStreamService_SetLightsStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method SetLightsStream not implemented")
+}
+func (UnimplementedSetLightsStreamServiceServer) mustEmbedUnimplementedSetLightsStreamServiceServer() {
+}
+
+// UnsafeSetLightsStreamServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SetLightsStreamServiceServer will
+// result in compilation errors.
+type UnsafeSetLightsStreamServiceServer interface {
+	mustEmbedUnimplementedSetLightsStreamServiceServer()
+}
+
+func RegisterSetLightsStreamServiceServer(s grpc.ServiceRegistrar, srv SetLightsStreamServiceServer) {
+	s.RegisterService(&SetLightsStreamService_ServiceDesc, srv)
+}
+
+func _SetLightsStreamService_SetLightsStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(SetLightsStreamServiceServer).SetLightsStream(&setLightsStreamServiceSetLightsStreamServer{stream})
+}
+
+type SetLightsStreamService_SetLightsStreamServer interface {
+	SendAndClose(*Empty) error
+	Recv() (*LightsStatus, error)
+	grpc.ServerStream
+}
+
+type setLightsStreamServiceSetLightsStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *setLightsStreamServiceSetLightsStreamServer) SendAndClose(m *Empty) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *setLightsStreamServiceSetLightsStreamServer) Recv() (*LightsStatus, error) {
+	m := new(LightsStatus)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// SetLightsStreamService_ServiceDesc is the grpc.ServiceDesc for SetLightsStreamService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var SetLightsStreamService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "main.SetLightsStreamService",
+	HandlerType: (*SetLightsStreamServiceServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SetLightsStream",
+			Handler:       _SetLightsStreamService_SetLightsStream_Handler,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "messages.proto",
+}

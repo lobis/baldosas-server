@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
+	"io"
 	"net"
 	"sync"
 	"time"
@@ -21,7 +22,7 @@ type baldosaServer struct {
 	stopChannel chan bool
 }
 
-var baldosas = make(map[position]baldosaServer)
+var baldosas = make(map[position]*baldosaServer)
 
 var baldosaPort = 51234
 
@@ -30,6 +31,7 @@ type grpcServer struct {
 	pb.UnimplementedSensorServiceServer
 	pb.UnimplementedLightServiceServer
 	pb.UnimplementedSetLightsServiceServer
+	pb.UnimplementedSetLightsStreamServiceServer
 }
 
 func (s *grpcServer) GetPositions(_ context.Context, _ *pb.Empty) (*pb.Positions, error) {
@@ -43,7 +45,7 @@ func (s *grpcServer) GetPositions(_ context.Context, _ *pb.Empty) (*pb.Positions
 	return &pb.Positions{Positions: positions}, nil
 }
 
-func (s *grpcServer) SetLights(_ context.Context, in *pb.LightsStatus) (*pb.Empty, error) {
+func setLightsHelper(in *pb.LightsStatus) {
 	lightsMap := make(map[position]map[int]protocol.Light) // 3x3 to index to light
 	lightsMutex.Lock()
 	for _, light := range in.Lights {
@@ -67,26 +69,38 @@ func (s *grpcServer) SetLights(_ context.Context, in *pb.LightsStatus) (*pb.Empt
 			},
 		}
 	}
-	fmt.Println("CONNECTIONS:", baldosas)
 	for pos, lights3x3 := range lightsMap {
 		baldosa := baldosas[pos]
-		fmt.Println("Setting lights for", pos, "on", baldosa.ipAddress, "to", lights3x3, "connection:", baldosa.connection)
-		// TODO: why is connection nil if we are connected??
+		fmt.Println("Setting lights for", pos, "on", baldosa.ipAddress, "to", lights3x3)
 		if baldosa.connection != nil {
 			go func(baldosa baldosaServer, lights map[int]protocol.Light) {
 				err := protocol.SendMessage(baldosa.connection, protocol.SetLights(lights))
 				if err != nil {
 					fmt.Println("Error sending message:", err)
 				}
-				err = protocol.SendMessage(baldosa.connection, protocol.RequestLightsStatus())
-				if err != nil {
-					fmt.Println("Error sending message:", err)
-				}
-			}(baldosa, lights3x3)
+			}(*baldosa, lights3x3)
 		}
 	}
 	lightsMutex.Unlock()
+}
+
+func (s *grpcServer) SetLights(_ context.Context, in *pb.LightsStatus) (*pb.Empty, error) {
+	setLightsHelper(in)
 	return &pb.Empty{}, nil
+}
+
+func (s *grpcServer) SetLightsStream(stream pb.SetLightsStreamService_SetLightsStreamServer) error {
+	for {
+		lightsStatus, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			fmt.Println("Error receiving lights status:", err)
+			return err
+		}
+		setLightsHelper(lightsStatus)
+	}
 }
 
 func (s *grpcServer) GetSensorStatusUpdates(_ *pb.Empty, stream pb.SensorService_GetSensorStatusUpdatesServer) error {
@@ -125,6 +139,7 @@ func startGrpcServer() {
 	pb.RegisterSensorServiceServer(server, &grpcServer{})
 	pb.RegisterLightServiceServer(server, &grpcServer{})
 	pb.RegisterSetLightsServiceServer(server, &grpcServer{})
+	pb.RegisterSetLightsStreamServiceServer(server, &grpcServer{})
 	// start tcp server
 	listen, err := net.Listen("tcp", ":50051")
 	if err != nil {
@@ -171,7 +186,6 @@ func readMessages(pos position, baldosa baldosaServer) {
 				continue
 			}
 
-			fmt.Println("Reading message from", baldosa.ipAddress)
 			_, err = conn.Read(buf)
 			if err != nil {
 				fmt.Println("Error reading:", err)
@@ -287,7 +301,7 @@ func main() {
 	go startGrpcServer()
 
 	// initialize baldosas
-	baldosas[position{x: 0, y: 0}] = baldosaServer{ipAddress: "192.168.1.139"}
+	baldosas[position{x: 0, y: 0}] = &baldosaServer{ipAddress: "192.168.1.139"}
 
 	// initialize sensors and lights
 	for key := range baldosas {
@@ -300,55 +314,55 @@ func main() {
 		}
 	}
 
-	for pos, baldosa := range baldosas {
-		baldosas[pos] = baldosaServer{
-			ipAddress:   baldosa.ipAddress,
+	for pos, _ := range baldosas {
+		// mutable ref to baldosa
+		baldosas[pos] = &baldosaServer{
+			ipAddress:   baldosas[pos].ipAddress,
 			connection:  nil,
 			stopChannel: make(chan bool),
 		}
 
-		go func(pos position, baldosa baldosaServer) {
+		go func(pos position) {
 			for {
-				if baldosa.connection != nil {
-					fmt.Println("Sending ping to", baldosa.ipAddress)
-					err := protocol.SendMessage(baldosa.connection, protocol.Ping())
+				if baldosas[pos].connection != nil {
+					fmt.Println("Sending ping to", baldosas[pos].ipAddress)
+					err := protocol.SendMessage(baldosas[pos].connection, protocol.Ping())
 					if err != nil {
 						fmt.Println("Error sending ping:", err)
-						baldosa.connection = nil
-						baldosa.stopChannel <- true
+						baldosas[pos].connection = nil
+						baldosas[pos].stopChannel <- true
 					}
-					time.Sleep(5 * time.Second)
+					time.Sleep(1 * time.Second)
 				} else {
-					fmt.Println("Connecting to", baldosa.ipAddress, "on port", baldosaPort)
-					conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", baldosa.ipAddress, baldosaPort))
+					fmt.Println("Connecting to", baldosas[pos].ipAddress, "on port", baldosaPort)
+					conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", baldosas[pos].ipAddress, baldosaPort))
 					if err != nil {
 						fmt.Println("Error establishing connection:", err)
-						baldosa.connection = nil
-						if baldosa.stopChannel != nil {
-							close(baldosa.stopChannel)
-							baldosa.stopChannel = nil
+						baldosas[pos].connection = nil
+						if baldosas[pos].stopChannel != nil {
+							close(baldosas[pos].stopChannel)
+							baldosas[pos].stopChannel = nil
 						}
 					} else {
-						fmt.Println("Connected to", baldosa.ipAddress, "on port", baldosaPort)
-						// TODO: its not updating the global variable
-						baldosa.connection = conn
-						baldosa.stopChannel = make(chan bool)
+						fmt.Println("Connected to", baldosas[pos].ipAddress, "on port", baldosaPort)
+						baldosas[pos].connection = conn
+						baldosas[pos].stopChannel = make(chan bool)
 
-						go readMessages(pos, baldosa)
+						go readMessages(pos, *baldosas[pos])
 
-						err := protocol.SendMessage(baldosa.connection, protocol.RequestSensorsStatus())
+						err := protocol.SendMessage(baldosas[pos].connection, protocol.RequestSensorsStatus())
 						if err != nil {
 							fmt.Println("Error sending message:", err)
 						}
 
-						err = protocol.SendMessage(baldosa.connection, protocol.RequestLightsStatus())
+						err = protocol.SendMessage(baldosas[pos].connection, protocol.RequestLightsStatus())
 						if err != nil {
 							fmt.Println("Error sending message:", err)
 						}
 					}
 				}
 			}
-		}(pos, baldosa)
+		}(pos)
 	}
 
 	select {} // Block forever

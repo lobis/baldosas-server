@@ -17,20 +17,20 @@ def main():
     light_stub = messages_grpc.SetLightsServiceStub(channel)
     light_status = messages.LightStatus(position=messages.Position(x=1, y=1),
                                         status=messages.Light(on=messages.Color(r=255, g=0, b=0),
-                                                              off=messages.Color(r=255, g=0, b=255)))
+                                                              off=messages.Color(r=255, g=0, b=252)))
     light_stub.SetLights(messages.LightsStatus(lights=[light_status]))
 
-    # connect to the sensor status stream
-    sensor_status_stream = messages_grpc.SensorServiceStub(channel)
-    sensor_status = sensor_status_stream.GetSensorStatusUpdates(messages.Empty())
+    # send a stream of light status to the stream service
+    stream_stub = messages_grpc.SetLightsStreamServiceStub(channel)
+    light_status = messages.LightStatus(position=messages.Position(x=1, y=1),
+                                        status=messages.Light(on=messages.Color(r=255, g=0, b=0),
+                                                              off=messages.Color(r=255, g=0, b=252)))
 
-    # light status
-    light_status_stream = messages_grpc.LightServiceStub(channel)
-    light_status = light_status_stream.GetLightStatusUpdates(messages.Empty())
+    def generate_light_status():
+        for i in range(10):
+            yield messages.LightsStatus(lights=[light_status])
 
-    # print the light status
-    for status in light_status:
-        print(status)
+    stream = stream_stub.SetLightsStream(generate_light_status())
 
 
 if __name__ == "__main__":

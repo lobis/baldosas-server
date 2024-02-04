@@ -253,3 +253,67 @@ class SetLightsService(object):
             messages__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+
+class SetLightsStreamServiceStub(object):
+    """same but as a client stream
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.SetLightsStream = channel.stream_unary(
+                '/main.SetLightsStreamService/SetLightsStream',
+                request_serializer=messages__pb2.LightsStatus.SerializeToString,
+                response_deserializer=messages__pb2.Empty.FromString,
+                )
+
+
+class SetLightsStreamServiceServicer(object):
+    """same but as a client stream
+    """
+
+    def SetLightsStream(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_SetLightsStreamServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'SetLightsStream': grpc.stream_unary_rpc_method_handler(
+                    servicer.SetLightsStream,
+                    request_deserializer=messages__pb2.LightsStatus.FromString,
+                    response_serializer=messages__pb2.Empty.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'main.SetLightsStreamService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+ # This class is part of an EXPERIMENTAL API.
+class SetLightsStreamService(object):
+    """same but as a client stream
+    """
+
+    @staticmethod
+    def SetLightsStream(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_unary(request_iterator, target, '/main.SetLightsStreamService/SetLightsStream',
+            messages__pb2.LightsStatus.SerializeToString,
+            messages__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
