@@ -32,6 +32,7 @@ type grpcServer struct {
 	pb.UnimplementedLightServiceServer
 	pb.UnimplementedSetLightsServiceServer
 	pb.UnimplementedSetLightsStreamServiceServer
+	pb.UnimplementedSetBrightnessServiceServer
 }
 
 func (s *grpcServer) GetPositions(_ context.Context, _ *pb.Empty) (*pb.Positions, error) {
@@ -57,15 +58,15 @@ func setLightsHelper(in *pb.LightsStatus) {
 			lightsMap[positionSmall] = make(map[int]protocol.Light)
 		}
 		lightsMap[positionSmall][index] = protocol.Light{
-			On: protocol.Color{
-				R: uint8(light.Status.On.R),
-				G: uint8(light.Status.On.G),
-				B: uint8(light.Status.On.B),
+			Active: protocol.Color{
+				R: uint8(light.Status.Active.R),
+				G: uint8(light.Status.Active.G),
+				B: uint8(light.Status.Active.B),
 			},
-			Off: protocol.Color{
-				R: uint8(light.Status.Off.R),
-				G: uint8(light.Status.Off.G),
-				B: uint8(light.Status.Off.B),
+			Inactive: protocol.Color{
+				R: uint8(light.Status.Inactive.R),
+				G: uint8(light.Status.Inactive.G),
+				B: uint8(light.Status.Inactive.B),
 			},
 		}
 	}
@@ -123,7 +124,11 @@ func (s *grpcServer) GetLightStatusUpdates(_ *pb.Empty, stream pb.LightService_G
 		select {
 		case pos := <-lightsUpdateChannel:
 			lightsMutex.Lock()
-			err := stream.Send(&pb.LightStatus{Position: &pb.Position{X: int32(pos.x), Y: int32(pos.y)}, Status: &pb.Light{On: &pb.Color{R: int32(lights[pos].On.R), G: int32(lights[pos].On.G), B: int32(lights[pos].On.B)}, Off: &pb.Color{R: int32(lights[pos].Off.R), G: int32(lights[pos].Off.G), B: int32(lights[pos].Off.B)}}})
+			err := stream.Send(&pb.LightStatus{
+				Position: &pb.Position{X: int32(pos.x), Y: int32(pos.y)}, //
+				Status: &pb.Light{ //
+					Active:   &pb.Color{R: int32(lights[pos].Active.R), G: int32(lights[pos].Active.G), B: int32(lights[pos].Active.B)},
+					Inactive: &pb.Color{R: int32(lights[pos].Inactive.R), G: int32(lights[pos].Inactive.G), B: int32(lights[pos].Inactive.B)}}})
 			lightsMutex.Unlock()
 			if err != nil {
 				fmt.Println("Error sending sensor status:", err)
@@ -222,7 +227,7 @@ func readMessages(pos position, baldosa baldosaServer) {
 			// process payload
 			switch messageType {
 			case protocol.MessageTypePong:
-				fmt.Println("Received pong")
+				// fmt.Println("Received pong")
 			case protocol.MessageTypeSensorsStatus:
 				// fmt.Println("Received sensors status")
 				sensorsMutex.Lock()
@@ -248,20 +253,20 @@ func readMessages(pos position, baldosa baldosaServer) {
 				entries := len(payload) / 7
 				for i := 0; i < entries; i++ {
 					index := payload[i*7]
-					off := protocol.Color{
+					active := protocol.Color{
 						R: payload[i*7+1],
 						G: payload[i*7+2],
 						B: payload[i*7+3],
 					}
-					on := protocol.Color{
+					inactive := protocol.Color{
 						R: payload[i*7+4],
 						G: payload[i*7+5],
 						B: payload[i*7+6],
 					}
 					previousValue := lights[indexToPosition(int(index), pos)]
 					lights[indexToPosition(int(index), pos)] = protocol.Light{
-						On:  on,
-						Off: off,
+						Active:   active,
+						Inactive: inactive,
 					}
 					if previousValue != lights[indexToPosition(int(index), pos)] {
 						fmt.Println("Light", indexToPosition(int(index), pos), "changed to", lights[indexToPosition(int(index), pos)])
@@ -301,15 +306,18 @@ func main() {
 	go startGrpcServer()
 
 	// initialize baldosas
-	baldosas[position{x: 0, y: 0}] = &baldosaServer{ipAddress: "192.168.1.139"}
+	baldosas[position{x: 0, y: 0}] = &baldosaServer{ipAddress: "192.168.1.140"}
+	baldosas[position{x: 1, y: 0}] = &baldosaServer{ipAddress: "192.168.1.145"}
+	baldosas[position{x: 2, y: 0}] = &baldosaServer{ipAddress: "192.168.1.139"}
+	baldosas[position{x: 3, y: 0}] = &baldosaServer{ipAddress: "192.168.1.144"}
 
 	// initialize sensors and lights
 	for key := range baldosas {
 		for i := 0; i < 9; i++ {
 			sensors[indexToPosition(i, key)] = false
 			lights[indexToPosition(i, key)] = protocol.Light{
-				On:  protocol.Color{R: 255, G: 255, B: 255},
-				Off: protocol.Color{R: 0, G: 0, B: 0},
+				Active:   protocol.Color{R: 255, G: 255, B: 255},
+				Inactive: protocol.Color{R: 0, G: 0, B: 0},
 			}
 		}
 	}
@@ -325,7 +333,7 @@ func main() {
 		go func(pos position) {
 			for {
 				if baldosas[pos].connection != nil {
-					fmt.Println("Sending ping to", baldosas[pos].ipAddress)
+					// fmt.Println("Sending ping to", baldosas[pos].ipAddress)
 					err := protocol.SendMessage(baldosas[pos].connection, protocol.Ping())
 					if err != nil {
 						fmt.Println("Error sending ping:", err)

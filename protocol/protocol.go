@@ -7,8 +7,8 @@ type Color struct {
 }
 
 type Light struct {
-	On  Color
-	Off Color
+	Active   Color
+	Inactive Color
 }
 
 const (
@@ -57,8 +57,8 @@ func SetLights(lights map[int]Light) []byte {
 	payload := []byte{MessageTypeLightsSet}
 	for i, light := range lights {
 		payload = append(payload, byte(i))
-		payload = append(payload, light.Off.R, light.Off.G, light.Off.B)
-		payload = append(payload, light.On.R, light.On.G, light.On.B)
+		payload = append(payload, light.Active.R, light.Active.G, light.Active.B)
+		payload = append(payload, light.Inactive.R, light.Inactive.G, light.Inactive.B)
 	}
 	return FormatMessage(payload)
 }

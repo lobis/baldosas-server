@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0emessages.proto\x12\x04main\"\x07\n\x05\x45mpty\".\n\tPositions\x12!\n\tpositions\x18\x01 \x03(\x0b\x32\x0e.main.Position\" \n\x08Position\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\"(\n\x05\x43olor\x12\t\n\x01r\x18\x01 \x01(\x05\x12\t\n\x01g\x18\x02 \x01(\x05\x12\t\n\x01\x62\x18\x03 \x01(\x05\":\n\x05Light\x12\x17\n\x02on\x18\x01 \x01(\x0b\x32\x0b.main.Color\x12\x18\n\x03off\x18\x02 \x01(\x0b\x32\x0b.main.Color\"L\n\x0bLightStatus\x12 \n\x08position\x18\x01 \x01(\x0b\x32\x0e.main.Position\x12\x1b\n\x06status\x18\x02 \x01(\x0b\x32\x0b.main.Light\"1\n\x0cLightsStatus\x12!\n\x06lights\x18\x01 \x03(\x0b\x32\x11.main.LightStatus\"@\n\x0cSensorStatus\x12 \n\x08position\x18\x01 \x01(\x0b\x32\x0e.main.Position\x12\x0e\n\x06status\x18\x02 \x01(\x08\x32\x42\n\x10PositionsService\x12.\n\x0cGetPositions\x12\x0b.main.Empty\x1a\x0f.main.Positions\"\x00\x32N\n\rSensorService\x12=\n\x16GetSensorStatusUpdates\x12\x0b.main.Empty\x1a\x12.main.SensorStatus\"\x00\x30\x01\x32K\n\x0cLightService\x12;\n\x15GetLightStatusUpdates\x12\x0b.main.Empty\x1a\x11.main.LightStatus\"\x00\x30\x01\x32\x42\n\x10SetLightsService\x12.\n\tSetLights\x12\x12.main.LightsStatus\x1a\x0b.main.Empty\"\x00\x32P\n\x16SetLightsStreamService\x12\x36\n\x0fSetLightsStream\x12\x12.main.LightsStatus\x1a\x0b.main.Empty\"\x00(\x01\x42(Z&github.com/lobis/baldosas-server/protob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0emessages.proto\x12\x04main\"\x07\n\x05\x45mpty\".\n\tPositions\x12!\n\tpositions\x18\x01 \x03(\x0b\x32\x0e.main.Position\" \n\x08Position\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\"(\n\x05\x43olor\x12\t\n\x01r\x18\x01 \x01(\x05\x12\t\n\x01g\x18\x02 \x01(\x05\x12\t\n\x01\x62\x18\x03 \x01(\x05\"C\n\x05Light\x12\x1b\n\x06\x61\x63tive\x18\x01 \x01(\x0b\x32\x0b.main.Color\x12\x1d\n\x08inactive\x18\x02 \x01(\x0b\x32\x0b.main.Color\"L\n\x0bLightStatus\x12 \n\x08position\x18\x01 \x01(\x0b\x32\x0e.main.Position\x12\x1b\n\x06status\x18\x02 \x01(\x0b\x32\x0b.main.Light\"1\n\x0cLightsStatus\x12!\n\x06lights\x18\x01 \x03(\x0b\x32\x11.main.LightStatus\"@\n\x0cSensorStatus\x12 \n\x08position\x18\x01 \x01(\x0b\x32\x0e.main.Position\x12\x0e\n\x06status\x18\x02 \x01(\x08\"B\n\nBrightness\x12 \n\x08position\x18\x01 \x01(\x0b\x32\x0e.main.Position\x12\x12\n\nbrightness\x18\x02 \x01(\r\"8\n\x10\x42rightnessStatus\x12$\n\nbrightness\x18\x01 \x03(\x0b\x32\x10.main.Brightness2B\n\x10PositionsService\x12.\n\x0cGetPositions\x12\x0b.main.Empty\x1a\x0f.main.Positions\"\x00\x32N\n\rSensorService\x12=\n\x16GetSensorStatusUpdates\x12\x0b.main.Empty\x1a\x12.main.SensorStatus\"\x00\x30\x01\x32K\n\x0cLightService\x12;\n\x15GetLightStatusUpdates\x12\x0b.main.Empty\x1a\x11.main.LightStatus\"\x00\x30\x01\x32\x42\n\x10SetLightsService\x12.\n\tSetLights\x12\x12.main.LightsStatus\x1a\x0b.main.Empty\"\x00\x32N\n\x14SetBrightnessService\x12\x36\n\rSetBrightness\x12\x16.main.BrightnessStatus\x1a\x0b.main.Empty\"\x00\x32P\n\x16SetLightsStreamService\x12\x36\n\x0fSetLightsStream\x12\x12.main.LightsStatus\x1a\x0b.main.Empty\"\x00(\x01\x42(Z&github.com/lobis/baldosas-server/protob\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -31,21 +31,27 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_COLOR']._serialized_start=115
   _globals['_COLOR']._serialized_end=155
   _globals['_LIGHT']._serialized_start=157
-  _globals['_LIGHT']._serialized_end=215
-  _globals['_LIGHTSTATUS']._serialized_start=217
-  _globals['_LIGHTSTATUS']._serialized_end=293
-  _globals['_LIGHTSSTATUS']._serialized_start=295
-  _globals['_LIGHTSSTATUS']._serialized_end=344
-  _globals['_SENSORSTATUS']._serialized_start=346
-  _globals['_SENSORSTATUS']._serialized_end=410
-  _globals['_POSITIONSSERVICE']._serialized_start=412
-  _globals['_POSITIONSSERVICE']._serialized_end=478
-  _globals['_SENSORSERVICE']._serialized_start=480
-  _globals['_SENSORSERVICE']._serialized_end=558
-  _globals['_LIGHTSERVICE']._serialized_start=560
-  _globals['_LIGHTSERVICE']._serialized_end=635
-  _globals['_SETLIGHTSSERVICE']._serialized_start=637
-  _globals['_SETLIGHTSSERVICE']._serialized_end=703
-  _globals['_SETLIGHTSSTREAMSERVICE']._serialized_start=705
-  _globals['_SETLIGHTSSTREAMSERVICE']._serialized_end=785
+  _globals['_LIGHT']._serialized_end=224
+  _globals['_LIGHTSTATUS']._serialized_start=226
+  _globals['_LIGHTSTATUS']._serialized_end=302
+  _globals['_LIGHTSSTATUS']._serialized_start=304
+  _globals['_LIGHTSSTATUS']._serialized_end=353
+  _globals['_SENSORSTATUS']._serialized_start=355
+  _globals['_SENSORSTATUS']._serialized_end=419
+  _globals['_BRIGHTNESS']._serialized_start=421
+  _globals['_BRIGHTNESS']._serialized_end=487
+  _globals['_BRIGHTNESSSTATUS']._serialized_start=489
+  _globals['_BRIGHTNESSSTATUS']._serialized_end=545
+  _globals['_POSITIONSSERVICE']._serialized_start=547
+  _globals['_POSITIONSSERVICE']._serialized_end=613
+  _globals['_SENSORSERVICE']._serialized_start=615
+  _globals['_SENSORSERVICE']._serialized_end=693
+  _globals['_LIGHTSERVICE']._serialized_start=695
+  _globals['_LIGHTSERVICE']._serialized_end=770
+  _globals['_SETLIGHTSSERVICE']._serialized_start=772
+  _globals['_SETLIGHTSSERVICE']._serialized_end=838
+  _globals['_SETBRIGHTNESSSERVICE']._serialized_start=840
+  _globals['_SETBRIGHTNESSSERVICE']._serialized_end=918
+  _globals['_SETLIGHTSSTREAMSERVICE']._serialized_start=920
+  _globals['_SETLIGHTSSTREAMSERVICE']._serialized_end=1000
 # @@protoc_insertion_point(module_scope)

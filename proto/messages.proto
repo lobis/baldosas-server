@@ -22,8 +22,8 @@ message Color {
 }
 
 message Light {
-  Color on = 1;
-  Color off = 2;
+  Color active = 1;
+  Color inactive = 2;
 }
 
 message LightStatus {
@@ -38,6 +38,15 @@ message LightsStatus {
 message SensorStatus {
   Position position = 1;
   bool status = 2;
+}
+
+message Brightness {
+  Position position = 1;
+  uint32 brightness = 2; // 0 - 255
+}
+
+message BrightnessStatus {
+  repeated Brightness brightness = 1;
 }
 
 service PositionsService {
@@ -56,6 +65,10 @@ service LightService {
 
 service SetLightsService {
   rpc SetLights(LightsStatus) returns (Empty) {}
+}
+
+service SetBrightnessService {
+  rpc SetBrightness(BrightnessStatus) returns (Empty) {}
 }
 
 // same but as a client stream

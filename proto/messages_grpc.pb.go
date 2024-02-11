@@ -433,6 +433,96 @@ var SetLightsService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
+	SetBrightnessService_SetBrightness_FullMethodName = "/main.SetBrightnessService/SetBrightness"
+)
+
+// SetBrightnessServiceClient is the client API for SetBrightnessService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type SetBrightnessServiceClient interface {
+	SetBrightness(ctx context.Context, in *BrightnessStatus, opts ...grpc.CallOption) (*Empty, error)
+}
+
+type setBrightnessServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSetBrightnessServiceClient(cc grpc.ClientConnInterface) SetBrightnessServiceClient {
+	return &setBrightnessServiceClient{cc}
+}
+
+func (c *setBrightnessServiceClient) SetBrightness(ctx context.Context, in *BrightnessStatus, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, SetBrightnessService_SetBrightness_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SetBrightnessServiceServer is the server API for SetBrightnessService service.
+// All implementations must embed UnimplementedSetBrightnessServiceServer
+// for forward compatibility
+type SetBrightnessServiceServer interface {
+	SetBrightness(context.Context, *BrightnessStatus) (*Empty, error)
+	mustEmbedUnimplementedSetBrightnessServiceServer()
+}
+
+// UnimplementedSetBrightnessServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedSetBrightnessServiceServer struct {
+}
+
+func (UnimplementedSetBrightnessServiceServer) SetBrightness(context.Context, *BrightnessStatus) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetBrightness not implemented")
+}
+func (UnimplementedSetBrightnessServiceServer) mustEmbedUnimplementedSetBrightnessServiceServer() {}
+
+// UnsafeSetBrightnessServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SetBrightnessServiceServer will
+// result in compilation errors.
+type UnsafeSetBrightnessServiceServer interface {
+	mustEmbedUnimplementedSetBrightnessServiceServer()
+}
+
+func RegisterSetBrightnessServiceServer(s grpc.ServiceRegistrar, srv SetBrightnessServiceServer) {
+	s.RegisterService(&SetBrightnessService_ServiceDesc, srv)
+}
+
+func _SetBrightnessService_SetBrightness_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BrightnessStatus)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SetBrightnessServiceServer).SetBrightness(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SetBrightnessService_SetBrightness_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SetBrightnessServiceServer).SetBrightness(ctx, req.(*BrightnessStatus))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// SetBrightnessService_ServiceDesc is the grpc.ServiceDesc for SetBrightnessService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var SetBrightnessService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "main.SetBrightnessService",
+	HandlerType: (*SetBrightnessServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "SetBrightness",
+			Handler:    _SetBrightnessService_SetBrightness_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "messages.proto",
+}
+
+const (
 	SetLightsStreamService_SetLightsStream_FullMethodName = "/main.SetLightsStreamService/SetLightsStream"
 )
 
