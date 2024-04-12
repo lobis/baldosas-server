@@ -71,6 +71,7 @@ service SetBrightnessService {
   rpc SetBrightness(BrightnessStatus) returns (Empty) {}
 }
 
+
 // same but as a client stream
 service SetLightsStreamService {
   rpc SetLightsStream(stream LightsStatus) returns (Empty) {}

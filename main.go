@@ -306,10 +306,28 @@ func main() {
 	go startGrpcServer()
 
 	// initialize baldosas
-	baldosas[position{x: 0, y: 0}] = &baldosaServer{ipAddress: "192.168.1.140"}
-	baldosas[position{x: 1, y: 0}] = &baldosaServer{ipAddress: "192.168.1.145"}
-	baldosas[position{x: 2, y: 0}] = &baldosaServer{ipAddress: "192.168.1.139"}
-	baldosas[position{x: 3, y: 0}] = &baldosaServer{ipAddress: "192.168.1.144"}
+	baldosas[position{x: 0, y: 0}] = &baldosaServer{ipAddress: "192.168.31.10"}
+	baldosas[position{x: 1, y: 0}] = &baldosaServer{ipAddress: "192.168.31.11"}
+	baldosas[position{x: 2, y: 0}] = &baldosaServer{ipAddress: "192.168.31.12"}
+	baldosas[position{x: 3, y: 0}] = &baldosaServer{ipAddress: "192.168.32.13"}
+	baldosas[position{x: 4, y: 0}] = &baldosaServer{ipAddress: "192.168.32.14"}
+	baldosas[position{x: 5, y: 0}] = &baldosaServer{ipAddress: "192.168.32.15"}
+	baldosas[position{x: 6, y: 0}] = &baldosaServer{ipAddress: "192.168.32.16"}
+	baldosas[position{x: 7, y: 0}] = &baldosaServer{ipAddress: "192.168.32.17"}
+
+	/*
+		file, err := os.Open("config.json")
+		if err != nil {
+			fmt.Println("Error opening config file:", err)
+			return
+		}
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				fmt.Println("Error closing file:", err)
+			}
+		}(file)
+	*/
 
 	// initialize sensors and lights
 	for key := range baldosas {
