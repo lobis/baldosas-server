@@ -1,7 +1,6 @@
+import grpc
 import random
 import threading
-
-import grpc
 
 import messages_pb2 as messages
 import messages_pb2_grpc as messages_grpc
@@ -62,7 +61,9 @@ def update_state(channel: grpc.Channel):
 
 def main():
     # connect to server
-    channel = grpc.insecure_channel('localhost:50051')
+    host = "192.168.31.187"
+    channel = grpc.insecure_channel(f"{host}:50051")
+    print("Connected to", host)
 
     # positions
     positions_stub = messages_grpc.PositionsServiceStub(channel)

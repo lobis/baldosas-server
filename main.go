@@ -306,14 +306,30 @@ func main() {
 	go startGrpcServer()
 
 	// initialize baldosas
-	baldosas[position{x: 0, y: 0}] = &baldosaServer{ipAddress: "192.168.31.10"}
-	baldosas[position{x: 1, y: 0}] = &baldosaServer{ipAddress: "192.168.31.11"}
-	baldosas[position{x: 2, y: 0}] = &baldosaServer{ipAddress: "192.168.31.12"}
-	baldosas[position{x: 3, y: 0}] = &baldosaServer{ipAddress: "192.168.32.13"}
-	baldosas[position{x: 4, y: 0}] = &baldosaServer{ipAddress: "192.168.32.14"}
-	baldosas[position{x: 5, y: 0}] = &baldosaServer{ipAddress: "192.168.32.15"}
-	baldosas[position{x: 6, y: 0}] = &baldosaServer{ipAddress: "192.168.32.16"}
-	baldosas[position{x: 7, y: 0}] = &baldosaServer{ipAddress: "192.168.32.17"}
+	baldosas[position{x: 0, y: 0}] = &baldosaServer{ipAddress: "192.168.31.43"}
+	baldosas[position{x: 1, y: 0}] = &baldosaServer{ipAddress: "192.168.31.47"}
+	baldosas[position{x: 2, y: 0}] = &baldosaServer{ipAddress: "192.168.31.51"}
+	baldosas[position{x: 3, y: 0}] = &baldosaServer{ipAddress: "192.168.31.55"}
+	baldosas[position{x: 4, y: 0}] = &baldosaServer{ipAddress: "192.168.31.59"}
+	baldosas[position{x: 5, y: 0}] = &baldosaServer{ipAddress: "192.168.31.63"}
+	baldosas[position{x: 0, y: 1}] = &baldosaServer{ipAddress: "192.168.31.42"}
+	baldosas[position{x: 1, y: 1}] = &baldosaServer{ipAddress: "192.168.31.46"}
+	baldosas[position{x: 2, y: 1}] = &baldosaServer{ipAddress: "192.168.31.50"}
+	baldosas[position{x: 3, y: 1}] = &baldosaServer{ipAddress: "192.168.31.54"}
+	baldosas[position{x: 4, y: 1}] = &baldosaServer{ipAddress: "192.168.31.58"}
+	baldosas[position{x: 5, y: 1}] = &baldosaServer{ipAddress: "192.168.31.62"}
+	baldosas[position{x: 0, y: 2}] = &baldosaServer{ipAddress: "192.168.31.41"}
+	baldosas[position{x: 1, y: 2}] = &baldosaServer{ipAddress: "192.168.31.45"}
+	baldosas[position{x: 2, y: 2}] = &baldosaServer{ipAddress: "192.168.31.49"}
+	baldosas[position{x: 3, y: 2}] = &baldosaServer{ipAddress: "192.168.31.53"}
+	baldosas[position{x: 4, y: 2}] = &baldosaServer{ipAddress: "192.168.31.57"}
+	baldosas[position{x: 5, y: 2}] = &baldosaServer{ipAddress: "192.168.31.61"}
+	baldosas[position{x: 0, y: 3}] = &baldosaServer{ipAddress: "192.168.31.40"}
+	baldosas[position{x: 1, y: 3}] = &baldosaServer{ipAddress: "192.168.31.44"}
+	baldosas[position{x: 2, y: 3}] = &baldosaServer{ipAddress: "192.168.31.48"}
+	baldosas[position{x: 3, y: 3}] = &baldosaServer{ipAddress: "192.168.31.52"}
+	baldosas[position{x: 4, y: 3}] = &baldosaServer{ipAddress: "192.168.31.56"}
+	baldosas[position{x: 5, y: 3}] = &baldosaServer{ipAddress: "192.168.31.60"}
 
 	/*
 		file, err := os.Open("config.json")
