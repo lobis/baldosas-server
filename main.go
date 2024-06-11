@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"io"
 	"net"
+	"sort"
 	"sync"
 	"time"
 )
@@ -22,7 +23,40 @@ type baldosaServer struct {
 	stopChannel chan bool
 }
 
-var baldosas = make(map[position]*baldosaServer)
+var baldosas = map[position]*baldosaServer{
+	{0, 0}: &baldosaServer{ipAddress: "192.168.31.43"},
+	{1, 0}: &baldosaServer{ipAddress: "192.168.31.47"},
+	{2, 0}: &baldosaServer{ipAddress: "192.168.31.51"},
+	{3, 0}: &baldosaServer{ipAddress: "192.168.31.55"},
+	{4, 0}: &baldosaServer{ipAddress: "192.168.31.59"},
+	{5, 0}: &baldosaServer{ipAddress: "192.168.31.63"},
+	{0, 1}: &baldosaServer{ipAddress: "192.168.31.42"},
+	{1, 1}: &baldosaServer{ipAddress: "192.168.31.46"},
+	{2, 1}: &baldosaServer{ipAddress: "192.168.31.50"},
+	{3, 1}: &baldosaServer{ipAddress: "192.168.31.54"},
+	{4, 1}: &baldosaServer{ipAddress: "192.168.31.58"},
+	{5, 1}: &baldosaServer{ipAddress: "192.168.31.62"},
+	{0, 2}: &baldosaServer{ipAddress: "192.168.31.41"},
+	{1, 2}: &baldosaServer{ipAddress: "192.168.31.45"},
+	{2, 2}: &baldosaServer{ipAddress: "192.168.31.49"},
+	{3, 2}: &baldosaServer{ipAddress: "192.168.31.53"},
+	{4, 2}: &baldosaServer{ipAddress: "192.168.31.57"},
+	{5, 2}: &baldosaServer{ipAddress: "192.168.31.61"},
+	{0, 3}: &baldosaServer{ipAddress: "192.168.31.40"},
+	{1, 3}: &baldosaServer{ipAddress: "192.168.31.44"},
+	{2, 3}: &baldosaServer{ipAddress: "192.168.31.48"},
+	{3, 3}: &baldosaServer{ipAddress: "192.168.31.52"},
+	{4, 3}: &baldosaServer{ipAddress: "192.168.31.56"},
+	{5, 3}: &baldosaServer{ipAddress: "192.168.31.60"},
+}
+
+// map to relate position to string
+var positionToString = map[position]string{
+	{0, 3}: "A1", {1, 3}: "B1", {2, 3}: "C1", {3, 3}: "D1", {4, 3}: "E1", {5, 3}: "F1",
+	{0, 2}: "A2", {1, 2}: "B2", {2, 2}: "C2", {3, 2}: "D2", {4, 2}: "E2", {5, 2}: "F2",
+	{0, 1}: "A3", {1, 1}: "B3", {2, 1}: "C3", {3, 1}: "D3", {4, 1}: "E3", {5, 1}: "F3",
+	{0, 0}: "A4", {1, 0}: "B4", {2, 0}: "C4", {3, 0}: "D4", {4, 0}: "E4", {5, 0}: "F4",
+}
 
 var baldosaPort = 51234
 
@@ -284,13 +318,15 @@ func readMessages(pos position, baldosa baldosaServer) {
 	}
 }
 
+// Converts an index in a 3x3 grid to a global position considering the position of the 3x3 grid with horizontal flip
 func indexToPosition(index int, positionOf3x3 position) position {
 	return position{
-		x: positionOf3x3.x*3 + index%3,
-		y: positionOf3x3.y*3 + index/3,
+		x: positionOf3x3.x*3 + (2 - index%3),
+		y: positionOf3x3.y*3 + (2 - index/3),
 	}
 }
 
+// Converts a global position to a 3x3 grid position
 func positionBigToSmall(pos position) position {
 	return position{
 		x: pos.x / 3,
@@ -298,36 +334,14 @@ func positionBigToSmall(pos position) position {
 	}
 }
 
+// Converts a position within a 3x3 grid to an index considering horizontal flip
 func positionToIndex(pos position) int {
-	return (pos.x%3)%3 + (pos.y%3)*3
+	localX := pos.x % 3
+	localY := pos.y % 3
+	return (2-localY)*3 + (2 - localX)
 }
 
 func main() {
-	baldosas[position{x: 0, y: 0}] = &baldosaServer{ipAddress: "192.168.31.43"}
-	baldosas[position{x: 1, y: 0}] = &baldosaServer{ipAddress: "192.168.31.47"}
-	baldosas[position{x: 2, y: 0}] = &baldosaServer{ipAddress: "192.168.31.51"}
-	baldosas[position{x: 3, y: 0}] = &baldosaServer{ipAddress: "192.168.31.55"}
-	baldosas[position{x: 4, y: 0}] = &baldosaServer{ipAddress: "192.168.31.59"}
-	baldosas[position{x: 5, y: 0}] = &baldosaServer{ipAddress: "192.168.31.63"}
-	baldosas[position{x: 0, y: 1}] = &baldosaServer{ipAddress: "192.168.31.42"}
-	baldosas[position{x: 1, y: 1}] = &baldosaServer{ipAddress: "192.168.31.46"}
-	baldosas[position{x: 2, y: 1}] = &baldosaServer{ipAddress: "192.168.31.50"}
-	baldosas[position{x: 3, y: 1}] = &baldosaServer{ipAddress: "192.168.31.54"}
-	baldosas[position{x: 4, y: 1}] = &baldosaServer{ipAddress: "192.168.31.58"}
-	baldosas[position{x: 5, y: 1}] = &baldosaServer{ipAddress: "192.168.31.62"}
-	baldosas[position{x: 0, y: 2}] = &baldosaServer{ipAddress: "192.168.31.41"}
-	baldosas[position{x: 1, y: 2}] = &baldosaServer{ipAddress: "192.168.31.45"}
-	baldosas[position{x: 2, y: 2}] = &baldosaServer{ipAddress: "192.168.31.49"}
-	baldosas[position{x: 3, y: 2}] = &baldosaServer{ipAddress: "192.168.31.53"}
-	baldosas[position{x: 4, y: 2}] = &baldosaServer{ipAddress: "192.168.31.57"}
-	baldosas[position{x: 5, y: 2}] = &baldosaServer{ipAddress: "192.168.31.61"}
-	baldosas[position{x: 0, y: 3}] = &baldosaServer{ipAddress: "192.168.31.40"}
-	baldosas[position{x: 1, y: 3}] = &baldosaServer{ipAddress: "192.168.31.44"}
-	baldosas[position{x: 2, y: 3}] = &baldosaServer{ipAddress: "192.168.31.48"}
-	baldosas[position{x: 3, y: 3}] = &baldosaServer{ipAddress: "192.168.31.52"}
-	baldosas[position{x: 4, y: 3}] = &baldosaServer{ipAddress: "192.168.31.56"}
-	baldosas[position{x: 5, y: 3}] = &baldosaServer{ipAddress: "192.168.31.60"}
-
 	go startGrpcServer()
 
 	// initialize sensors and lights
@@ -405,13 +419,25 @@ func main() {
 			// print the number of connections out of total
 			fmt.Println("Connected to", count, "out of", len(baldosas))
 			// print connected ips, and not connected ips
+			// sets of connected strings, disconnected
+			var connected []string
+			var disconnected []string
+
 			for pos, baldosa := range baldosas {
 				if baldosa.connection != nil {
-					fmt.Println("Connected to", baldosa.ipAddress, "on", pos)
+					connected = append(connected, positionToString[pos])
 				} else {
-					fmt.Println("Not connected to", baldosa.ipAddress, "on", pos)
+					disconnected = append(disconnected, positionToString[pos])
 				}
 			}
+
+			// sort both alphabetically
+			sort.Strings(connected)
+			sort.Strings(disconnected)
+
+			fmt.Println("Connected to:", connected)
+			fmt.Println("Not connected to:", disconnected)
+
 			time.Sleep(5 * time.Second)
 		}
 	}()
