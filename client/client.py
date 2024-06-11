@@ -14,6 +14,7 @@ def update_state(channel: grpc.Channel):
     sensor_stub = messages_grpc.SensorServiceStub(channel)
     # read from stream forever
     lights_stub = messages_grpc.SetLightsServiceStub(channel)
+    brightness_stub = messages_grpc.SetBrightnessServiceStub(channel)
 
     # count how many positions for each color
     color_count = {
@@ -61,7 +62,8 @@ def update_state(channel: grpc.Channel):
 
 def main():
     # connect to server
-    host = "192.168.31.187"
+    # host = "192.168.31.187"
+    host = "localhost"
     channel = grpc.insecure_channel(f"{host}:50051")
     print("Connected to", host)
 
@@ -96,8 +98,18 @@ def main():
                              status=messages.Light(inactive=color, active=messages.Color(r=0, g=0, b=0)))
         for position, color in state.items()
     ])
-
     lights_stub.SetLights(lights_message)
+
+    # set brightness
+    brightness = 255
+    brightness_stub = messages_grpc.SetBrightnessServiceStub(channel)
+    brightness_message = messages.BrightnessStatus(brightness=[
+        messages.Brightness(position=messages.Position(x=position[0], y=position[1]),
+                             brightness=brightness)
+        for position, color in state.items()
+    ])
+    brightness_stub.SetBrightness(brightness_message)
+
     # start a thread to update state
     update_state_thread = threading.Thread(target=update_state, args=(channel,), daemon=True)
     update_state_thread.start()

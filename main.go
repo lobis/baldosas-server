@@ -138,6 +138,16 @@ func (s *grpcServer) SetLightsStream(stream pb.SetLightsStreamService_SetLightsS
 	}
 }
 
+func (s *grpcServer) SetBrightness(_ context.Context, in *pb.BrightnessStatus) (*pb.Empty, error) {
+	/*
+		for position, brightness := range in.Brightness {
+			// TODO: get baldosa and change brightness
+		}
+
+	*/
+	return &pb.Empty{}, nil
+}
+
 func (s *grpcServer) GetSensorStatusUpdates(_ *pb.Empty, stream pb.SensorService_GetSensorStatusUpdatesServer) error {
 	for {
 		select {
@@ -179,6 +189,7 @@ func startGrpcServer() {
 	pb.RegisterLightServiceServer(server, &grpcServer{})
 	pb.RegisterSetLightsServiceServer(server, &grpcServer{})
 	pb.RegisterSetLightsStreamServiceServer(server, &grpcServer{})
+	pb.RegisterSetBrightnessServiceServer(server, &grpcServer{})
 	// start tcp server
 	listen, err := net.Listen("tcp", ":50051")
 	if err != nil {
