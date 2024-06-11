@@ -92,16 +92,8 @@ def main():
         (position.x, position.y): color for position, color in zip(positions.positions, sequence)
     }
 
-    lights_stub = messages_grpc.SetLightsServiceStub(channel)
-    lights_message = messages.LightsStatus(lights=[
-        messages.LightStatus(position=messages.Position(x=position[0], y=position[1]),
-                             status=messages.Light(inactive=color, active=messages.Color(r=0, g=0, b=0)))
-        for position, color in state.items()
-    ])
-    lights_stub.SetLights(lights_message)
-
     # set brightness
-    brightness = 255
+    brightness = 100
     brightness_stub = messages_grpc.SetBrightnessServiceStub(channel)
     brightness_message = messages.BrightnessStatus(brightness=[
         messages.Brightness(position=messages.Position(x=position[0], y=position[1]),
@@ -109,6 +101,14 @@ def main():
         for position, color in state.items()
     ])
     brightness_stub.SetBrightness(brightness_message)
+
+    lights_stub = messages_grpc.SetLightsServiceStub(channel)
+    lights_message = messages.LightsStatus(lights=[
+        messages.LightStatus(position=messages.Position(x=position[0], y=position[1]),
+                             status=messages.Light(inactive=color, active=messages.Color(r=0, g=0, b=0)))
+        for position, color in state.items()
+    ])
+    lights_stub.SetLights(lights_message)
 
     # start a thread to update state
     update_state_thread = threading.Thread(target=update_state, args=(channel,), daemon=True)

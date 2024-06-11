@@ -139,12 +139,27 @@ func (s *grpcServer) SetLightsStream(stream pb.SetLightsStreamService_SetLightsS
 }
 
 func (s *grpcServer) SetBrightness(_ context.Context, in *pb.BrightnessStatus) (*pb.Empty, error) {
-	/*
-		for position, brightness := range in.Brightness {
-			// TODO: get baldosa and change brightness
+	for _, brightness := range in.Brightness {
+		brightnessLevel := uint8(brightness.Brightness)
+		pos := position{x: int(brightness.Position.X), y: int(brightness.Position.Y)}
+		pos3x3 := positionBigToSmall(pos)
+		fmt.Println("Setting brightness for", pos, "/", pos3x3, "to", brightness)
+		// if position not in baldosas keys
+		if baldosas[pos3x3] == nil {
+			fmt.Println("Error: 3x3 position not found", pos3x3, "from", pos)
+			continue
 		}
+		baldosa := baldosas[pos3x3]
+		if baldosa.connection != nil {
+			go func(b baldosaServer, brightness uint8) {
+				err := protocol.SendMessage(b.connection, protocol.SetBrightness(brightness))
+				if err != nil {
+					fmt.Println("Error sending message:", err)
+				}
+			}(*baldosa, brightnessLevel)
+		}
+	}
 
-	*/
 	return &pb.Empty{}, nil
 }
 
