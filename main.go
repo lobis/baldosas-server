@@ -392,5 +392,29 @@ func main() {
 		}(pos)
 	}
 
+	// create a goroutine that prints how many connections
+	go func() {
+		for {
+			fmt.Println("Connections summary:")
+			count := 0
+			for _, baldosa := range baldosas {
+				if baldosa.connection != nil {
+					count++
+				}
+			}
+			// print the number of connections out of total
+			fmt.Println("Connected to", count, "out of", len(baldosas))
+			// print connected ips, and not connected ips
+			for pos, baldosa := range baldosas {
+				if baldosa.connection != nil {
+					fmt.Println("Connected to", baldosa.ipAddress, "on", pos)
+				} else {
+					fmt.Println("Not connected to", baldosa.ipAddress, "on", pos)
+				}
+			}
+			time.Sleep(5 * time.Second)
+		}
+	}()
+
 	select {} // Block forever
 }
