@@ -303,9 +303,6 @@ func positionToIndex(pos position) int {
 }
 
 func main() {
-	go startGrpcServer()
-
-	// initialize baldosas
 	baldosas[position{x: 0, y: 0}] = &baldosaServer{ipAddress: "192.168.31.43"}
 	baldosas[position{x: 1, y: 0}] = &baldosaServer{ipAddress: "192.168.31.47"}
 	baldosas[position{x: 2, y: 0}] = &baldosaServer{ipAddress: "192.168.31.51"}
@@ -331,19 +328,7 @@ func main() {
 	baldosas[position{x: 4, y: 3}] = &baldosaServer{ipAddress: "192.168.31.56"}
 	baldosas[position{x: 5, y: 3}] = &baldosaServer{ipAddress: "192.168.31.60"}
 
-	/*
-		file, err := os.Open("config.json")
-		if err != nil {
-			fmt.Println("Error opening config file:", err)
-			return
-		}
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				fmt.Println("Error closing file:", err)
-			}
-		}(file)
-	*/
+	go startGrpcServer()
 
 	// initialize sensors and lights
 	for key := range baldosas {
