@@ -350,8 +350,8 @@ func main() {
 		for i := 0; i < 9; i++ {
 			sensors[indexToPosition(i, key)] = false
 			lights[indexToPosition(i, key)] = protocol.Light{
-				Active:   protocol.Color{R: 255, G: 255, B: 255},
-				Inactive: protocol.Color{R: 0, G: 0, B: 0},
+				Active:   protocol.Color{R: 255, G: 255, B: 255}, // white
+				Inactive: protocol.Color{R: 0, G: 0, B: 255},     // blue
 			}
 		}
 	}
